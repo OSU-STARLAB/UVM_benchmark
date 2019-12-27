@@ -30,54 +30,60 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort=t
 
 }
 
-int *d_adjacencyList;
-int *d_edgesOffset;
-int *d_edgesSize;
-int *d_distance;
-int *d_parent;
-int *d_currentQueue;
-int *d_nextQueue;
-int *d_degrees;
+int *u_adjacencyList;
+int *u_edgesOffset;
+int *u_edgesSize;
+int *u_distance;
+int *u_parent;
+int *u_currentQueue;
+int *u_nextQueue;
+int *u_degrees;
 
 int *incrDegrees;
 
 
 void initCuda(Graph &G) {
-    checkError(cudaMalloc((void **)&d_adjacencyList, G.numEdges * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_edgesOffset, G.numVertices * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_edgesSize, G.numVertices * sizeof(int)) );
-    checkError(cudaMalloc((void **)&d_distance, G.numVertices * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_parent, G.numVertices * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_currentQueue, G.numVertices * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_nextQueue, G.numVertices * sizeof(int) ));
-    checkError(cudaMalloc((void **)&d_degrees, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_adjacencyList, G.numEdges * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_edgesOffset, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_edgesSize, G.numVertices * sizeof(int)) );
+    checkError(cudaMallocManaged(&u_distance, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_parent, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_currentQueue, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_nextQueue, G.numVertices * sizeof(int) ));
+    checkError(cudaMallocManaged(&u_degrees, G.numVertices * sizeof(int) ));
+
+
+
     checkError(cudaMallocHost((void **) &incrDegrees, sizeof(int) * G.numVertices));
 
-    checkError(cudaMemcpy(d_adjacencyList, G.adjacencyList.data(), G.numEdges * sizeof(int), cudaMemcpyHostToDevice));
-    checkError(cudaMemcpy(d_edgesOffset, G.edgesOffset.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
-    checkError(cudaMemcpy(d_edgesSize, G.edgesSize.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice ));
+
+    memcpy(u_adjacencyList, G.adjacencyList.data(), G.numEdges * sizeof(int));
+    memcpy(u_edgesOffset, G.edgesOffset.data(), G.numVertices * sizeof(int));
+    memcpy(u_edgesSize, G.edgesSize.data(), G.numVertices * sizeof(int));
+    // checkError(cudaMemcpy(d_adjacencyList, G.adjacencyList.data(), G.numEdges * sizeof(int), cudaMemcpyHostToDevice));
+    // checkError(cudaMemcpy(d_edgesOffset, G.edgesOffset.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
+    // checkError(cudaMemcpy(d_edgesSize, G.edgesSize.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice ));
 
 }
 
 void finalizeCuda() {
 
-    checkError(cudaFree(d_adjacencyList));
-    checkError(cudaFree(d_edgesOffset));
-    checkError(cudaFree(d_edgesSize));
-    checkError(cudaFree(d_distance));
-    checkError(cudaFree(d_parent));
-    checkError(cudaFree(d_currentQueue));
-    checkError(cudaFree(d_nextQueue));
-    checkError(cudaFree(d_degrees));
+    checkError(cudaFree(u_adjacencyList));
+    checkError(cudaFree(u_edgesOffset));
+    checkError(cudaFree(u_edgesSize));
+    checkError(cudaFree(u_distance));
+    checkError(cudaFree(u_parent));
+    checkError(cudaFree(u_currentQueue));
+    checkError(cudaFree(u_nextQueue));
+    checkError(cudaFree(u_degrees));
     checkError(cudaFreeHost(incrDegrees));
-    
 }
 
 
 
 void checkOutput(std::vector<int> &distance, std::vector<int> &expectedDistance, Graph &G) {
     for (int i = 0; i < G.numVertices; i++) {
-        if (distance[i] != expectedDistance[i]) {
+        if (*(u_distance+i) != expectedDistance[i]) {
             printf("%d %d %d\n", i, distance[i], expectedDistance[i]);
             printf("Wrong output!\n");
             exit(1);
@@ -95,17 +101,20 @@ void initializeCudaBfs(int startVertex, std::vector<int> &distance, std::vector<
     distance[startVertex] = 0;
     parent[startVertex] = 0;
 
-    checkError(cudaMemcpy(d_distance, distance.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
-    checkError(cudaMemcpy(d_parent, parent.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
+    // checkError(cudaMemcpy(d_distance, distance.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
+    // checkError(cudaMemcpy(d_parent, parent.data(), G.numVertices * sizeof(int), cudaMemcpyHostToDevice));
+    memcpy(u_distance, distance.data(), G.numVertices * sizeof(int));
+    memcpy(u_parent, parent.data(), G.numVertices * sizeof(int));
 
     int firstElementQueue = startVertex;
-    cudaMemcpy(d_currentQueue, &firstElementQueue, sizeof(int), cudaMemcpyHostToDevice);
+    // cudaMemcpy(d_currentQueue, &firstElementQueue, sizeof(int), cudaMemcpyHostToDevice);
+    *u_currentQueue = firstElementQueue;
 }
 
 void finalizeCudaBfs(std::vector<int> &distance, std::vector<int> &parent, Graph &G) {
     //copy memory from device
-    checkError(cudaMemcpy(distance.data(), d_distance, G.numVertices * sizeof(int), cudaMemcpyDeviceToHost));
-    checkError(cudaMemcpy(parent.data(), d_parent, G.numVertices * sizeof(int), cudaMemcpyDeviceToHost));
+    // checkError(cudaMemcpy(distance.data(), d_distance, G.numVertices * sizeof(int), cudaMemcpyDeviceToHost));
+    // checkError(cudaMemcpy(parent.data(), d_parent, G.numVertices * sizeof(int), cudaMemcpyDeviceToHost));
 }
 
 void runCudaSimpleBfs(int startVertex, Graph &G, std::vector<int> &distance,
@@ -128,7 +137,7 @@ void runCudaSimpleBfs(int startVertex, Graph &G, std::vector<int> &distance,
         // checkError(cuLaunchKernel(cuSimpleBfs, G.numVertices / 1024 + 1, 1, 1,
         //                           1024, 1, 1, 0, 0, args, 0));
 
-        simpleBfs<<<G.numVertices / 1024 + 1, 1024>>>(G.numVertices, level, d_adjacencyList, d_edgesOffset, d_edgesSize, d_distance, d_parent, changed);                 
+        simpleBfs<<<G.numVertices / 1024 + 1, 1024>>>(G.numVertices, level, u_adjacencyList, u_edgesOffset, u_edgesSize, u_distance, u_parent, changed);                 
         cudaDeviceSynchronize();
         level++;
     }
@@ -156,13 +165,13 @@ void runCudaQueueBfs(int startVertex, Graph &G, std::vector<int> &distance,
     int level = 0;
     while (queueSize) {
 
-        queueBfs<<<queueSize / 1024 + 1, 1024>>>(level, d_adjacencyList, d_edgesOffset, d_edgesSize, d_distance, d_parent, queueSize,
-                                                nextQueueSize, d_currentQueue, d_nextQueue);
+        queueBfs<<<queueSize / 1024 + 1, 1024>>>(level, u_adjacencyList, u_edgesOffset, u_edgesSize, u_distance, u_parent, queueSize,
+                                                nextQueueSize, u_currentQueue, u_nextQueue);
         cudaDeviceSynchronize();
         level++;
         queueSize = *nextQueueSize;
         *nextQueueSize = 0;
-        std::swap(d_currentQueue, d_nextQueue);
+        std::swap(u_currentQueue, u_nextQueue);
     }
 
 
@@ -173,39 +182,25 @@ void runCudaQueueBfs(int startVertex, Graph &G, std::vector<int> &distance,
 }
 
 void nextLayer(int level, int queueSize) {
-    // void *args[] = {&level, &d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_distance, &d_parent, &queueSize,
-    // &d_currentQueue};
-    // checkError(cuLaunchKernel(cuNextLayer, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel cuNextLayer");
-    // cuCtxSynchronize();
-    nextLayer<<<queueSize / 1024 + 1, 1024>>>(level, d_adjacencyList, d_edgesOffset, d_edgesSize, d_distance, d_parent, queueSize,
-                                            d_currentQueue);
+
+    nextLayer<<<queueSize / 1024 + 1, 1024>>>(level, u_adjacencyList, u_edgesOffset, u_edgesSize, u_distance, u_parent, queueSize,
+                                            u_currentQueue);
     cudaDeviceSynchronize();
 
 }
 
 void countDegrees(int level, int queueSize) {
-    // void *args[] = {&d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_parent, &queueSize,
-    // &d_currentQueue, &d_degrees};
-    // checkError(cuLaunchKernel(cuCountDegrees, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel cuNextLayer");
-    // cuCtxSynchronize();
 
-    countDegrees<<<queueSize / 1024 + 1, 1024>>>(d_adjacencyList, d_edgesOffset, d_edgesSize, d_parent, queueSize,
-        d_currentQueue, d_degrees);
+    countDegrees<<<queueSize / 1024 + 1, 1024>>>(u_adjacencyList, u_edgesOffset, u_edgesSize, u_parent, queueSize,
+        u_currentQueue, u_degrees);
     cudaDeviceSynchronize();
 
 }
 
 void scanDegrees(int queueSize) {
 //run kernel so every block in d_currentQueue has prefix sums calculated
-    // void *args[] = {&queueSize, &d_degrees, &incrDegrees};
-    // checkError(cuLaunchKernel(cuScanDegrees, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0), "cannot run kernel scanDegrees");
-    // cuCtxSynchronize();
-    scanDegrees<<<queueSize / 1024 + 1, 1024>>>(queueSize, d_degrees, incrDegrees);
+
+    scanDegrees<<<queueSize / 1024 + 1, 1024>>>(queueSize, u_degrees, incrDegrees);
     cudaDeviceSynchronize();
     //count prefix sums on CPU for ends of blocks exclusive
     //already written previous block sum
@@ -216,18 +211,10 @@ void scanDegrees(int queueSize) {
 }
 
 void assignVerticesNextQueue(int queueSize, int nextQueueSize) {
-    // void *args[] = {&d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_parent, &queueSize, &d_currentQueue,
-    // &d_nextQueue, &d_degrees, &incrDegrees, &nextQueueSize};
-    // checkError(cuLaunchKernel(cuAssignVerticesNextQueue, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel assignVerticesNextQueue");
-    // cuCtxSynchronize();
 
-    assignVerticesNextQueue<<<queueSize / 1024 + 1, 1024>>>(d_adjacencyList, d_edgesOffset, d_edgesSize, d_parent, queueSize, d_currentQueue,
-        d_nextQueue, d_degrees, incrDegrees, nextQueueSize);
+    assignVerticesNextQueue<<<queueSize / 1024 + 1, 1024>>>(u_adjacencyList, u_edgesOffset, u_edgesSize, u_parent, queueSize, u_currentQueue,
+        u_nextQueue, u_degrees, incrDegrees, nextQueueSize);
     cudaDeviceSynchronize();
-
-
 
 }
 
@@ -255,7 +242,7 @@ void runCudaScanBfs(int startVertex, Graph &G, std::vector<int> &distance,
 
         level++;
         queueSize = nextQueueSize;
-        std::swap(d_currentQueue, d_nextQueue);
+        std::swap(u_currentQueue, u_nextQueue);
     }
 
 
@@ -287,7 +274,7 @@ int main(int argc, char **argv) {
     //save results from sequential bfs
     std::vector<int> expectedDistance(distance);
     std::vector<int> expectedParent(parent);
-
+    auto start = std::chrono::steady_clock::now();
     initCuda(G);
     //run CUDA simple parallel bfs
     runCudaSimpleBfs(startVertex, G, distance, parent);
@@ -297,11 +284,13 @@ int main(int argc, char **argv) {
     runCudaQueueBfs(startVertex, G, distance, parent);
     checkOutput(distance, expectedDistance, G);
 
-    // // //run CUDA scan parallel bfs
+    // //run CUDA scan parallel bfs
     runCudaScanBfs(startVertex, G, distance, parent);
     checkOutput(distance, expectedDistance, G);
-
     finalizeCuda();
+    auto end = std::chrono::steady_clock::now();
+    long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    printf("Overall Elapsed time in milliseconds : %li ms.\n", duration);
     return 0;
 }
 

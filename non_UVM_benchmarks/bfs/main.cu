@@ -173,12 +173,6 @@ void runCudaQueueBfs(int startVertex, Graph &G, std::vector<int> &distance,
 }
 
 void nextLayer(int level, int queueSize) {
-    // void *args[] = {&level, &d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_distance, &d_parent, &queueSize,
-    // &d_currentQueue};
-    // checkError(cuLaunchKernel(cuNextLayer, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel cuNextLayer");
-    // cuCtxSynchronize();
     nextLayer<<<queueSize / 1024 + 1, 1024>>>(level, d_adjacencyList, d_edgesOffset, d_edgesSize, d_distance, d_parent, queueSize,
                                             d_currentQueue);
     cudaDeviceSynchronize();
@@ -186,12 +180,6 @@ void nextLayer(int level, int queueSize) {
 }
 
 void countDegrees(int level, int queueSize) {
-    // void *args[] = {&d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_parent, &queueSize,
-    // &d_currentQueue, &d_degrees};
-    // checkError(cuLaunchKernel(cuCountDegrees, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel cuNextLayer");
-    // cuCtxSynchronize();
 
     countDegrees<<<queueSize / 1024 + 1, 1024>>>(d_adjacencyList, d_edgesOffset, d_edgesSize, d_parent, queueSize,
         d_currentQueue, d_degrees);
@@ -201,10 +189,7 @@ void countDegrees(int level, int queueSize) {
 
 void scanDegrees(int queueSize) {
 //run kernel so every block in d_currentQueue has prefix sums calculated
-    // void *args[] = {&queueSize, &d_degrees, &incrDegrees};
-    // checkError(cuLaunchKernel(cuScanDegrees, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0), "cannot run kernel scanDegrees");
-    // cuCtxSynchronize();
+
     scanDegrees<<<queueSize / 1024 + 1, 1024>>>(queueSize, d_degrees, incrDegrees);
     cudaDeviceSynchronize();
     //count prefix sums on CPU for ends of blocks exclusive
@@ -216,18 +201,10 @@ void scanDegrees(int queueSize) {
 }
 
 void assignVerticesNextQueue(int queueSize, int nextQueueSize) {
-    // void *args[] = {&d_adjacencyList, &d_edgesOffset, &d_edgesSize, &d_parent, &queueSize, &d_currentQueue,
-    // &d_nextQueue, &d_degrees, &incrDegrees, &nextQueueSize};
-    // checkError(cuLaunchKernel(cuAssignVerticesNextQueue, queueSize / 1024 + 1, 1, 1,
-    //             1024, 1, 1, 0, 0, args, 0),
-    // "cannot run kernel assignVerticesNextQueue");
-    // cuCtxSynchronize();
 
     assignVerticesNextQueue<<<queueSize / 1024 + 1, 1024>>>(d_adjacencyList, d_edgesOffset, d_edgesSize, d_parent, queueSize, d_currentQueue,
         d_nextQueue, d_degrees, incrDegrees, nextQueueSize);
     cudaDeviceSynchronize();
-
-
 
 }
 
@@ -287,7 +264,7 @@ int main(int argc, char **argv) {
     //save results from sequential bfs
     std::vector<int> expectedDistance(distance);
     std::vector<int> expectedParent(parent);
-
+    auto start = std::chrono::steady_clock::now();
     initCuda(G);
     //run CUDA simple parallel bfs
     runCudaSimpleBfs(startVertex, G, distance, parent);
@@ -302,6 +279,10 @@ int main(int argc, char **argv) {
     checkOutput(distance, expectedDistance, G);
 
     finalizeCuda();
+
+    auto end = std::chrono::steady_clock::now();
+    long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    printf("Overall Elapsed time in milliseconds : %li ms.\n", duration);
     return 0;
 }
 
