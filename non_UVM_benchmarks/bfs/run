@@ -1,0 +1,2 @@
+./main 5 <../../data/bfs/inputGen/graph16M.txt
+#./main 5 1000000 10000000
