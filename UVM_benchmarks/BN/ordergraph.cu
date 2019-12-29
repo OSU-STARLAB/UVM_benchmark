@@ -25,10 +25,15 @@ bool preGraph[NODE_N][NODE_N];
 bool bestGraph[HIGHEST][NODE_N][NODE_N];
 bool graph[NODE_N][NODE_N];
 // float prior[NODE_N][NODE_N];
-float *localscore, *D_localscore, *D_Score, *scores;
-float *LG;
-bool *D_parent;
-int *D_resP, *parents;
+// float *localscore, *D_localscore, *D_Score, *scores;
+float *U_LG, *localscore, *scores;
+float *U_localscore, *U_scores;
+bool *U_parent;
+int *U_resP, *parents;
+int *U_data;
+
+// bool *D_parent;
+// int *D_resP, *parents;
 
 void initial();  // initial orders and data
 int genOrders(); // swap
@@ -60,6 +65,9 @@ int main() {
               prior[i][j]=0.5;
       }
   */
+  cudaMallocManaged(&U_data, DATA_N * NODE_N * sizeof(int));
+  memcpy(U_data, &data, DATA_N * NODE_N);
+
   int i, j, c = 0, tmp, a, b;
   float tmpd;
   fpout = fopen(name, "w");
@@ -153,14 +161,14 @@ int main() {
 
   } // endwhile
 
-  cudaFreeHost(localscore);
-  cudaFree(D_localscore);
-  cudaFree(D_parent);
+  // cudaFreeHost(localscore);
+  cudaFree(U_localscore);
+  cudaFree(U_parent);
 
-  cudaFreeHost(scores);
-  cudaFreeHost(parents);
-  cudaFree(D_Score);
-  cudaFree(D_resP);
+  cudaFree(U_scores);
+  // cudaFreeHost(parents);
+  // cudaFree(D_Score);
+  cudaFree(U_resP);
 
   /*
           for(j=0;j<HIGHEST;j++){
@@ -241,10 +249,10 @@ void initial() {
   sizepernode = tmp;
   tmp *= NODE_N;
 
-  cudaMallocHost((void **)&localscore, tmp * sizeof(float));
+  cudaMallocManaged(&U_localscore, tmp * sizeof(float));
 
   for (i = 0; i < tmp; i++)
-    localscore[i] = 0;
+    U_localscore[i] = 0;
 
   for (i = 0; i < NODE_N; i++) {
     for (j = 0; j < NODE_N; j++)
@@ -322,41 +330,42 @@ int ConCore() {
 }
 
 void genScore() {
-  int *D_data;
-  float *D_LG;
+  // int *D_data;
+  // float *D_LG;
   dim3 grid(sizepernode / 256 + 1, 1, 1);
   dim3 threads(256, 1, 1);
 
   Pre_logGamma();
   // cudaPrintfInit();
-  cudaMalloc((void **)&D_data, NODE_N * DATA_N * sizeof(int));
-  cudaMalloc((void **)&D_localscore, NODE_N * sizepernode * sizeof(float));
-  cudaMalloc((void **)&D_LG, (DATA_N + 2) * sizeof(float));
-  cudaMemset(D_localscore, 0.0, NODE_N * sizepernode * sizeof(float));
-  cudaMemcpy(D_data, data, NODE_N * DATA_N * sizeof(int),
-             cudaMemcpyHostToDevice);
-  cudaMemcpy(D_LG, LG, (DATA_N + 2) * sizeof(float), cudaMemcpyHostToDevice);
-  genScoreKernel<<<grid, threads>>>(sizepernode, D_localscore, D_data, D_LG);
+  // cudaMalloc((void **)&D_data, NODE_N * DATA_N * sizeof(int));
+  // cudaMallocManaged(&U_localscore, NODE_N * sizepernode * sizeof(float));
+  // cudaMallocManaged((void **)&U_LG, (DATA_N + 2) * sizeof(float));
+  // cudaMemset(U_localscore, 0.0, NODE_N * sizepernode * sizeof(float));
+  // cudaMemcpy(D_data, data, NODE_N * DATA_N * sizeof(int),
+  //  cudaMemcpyHostToDevice);
+  // cudaMemcpy(D_LG, LG, (DATA_N + 2) * sizeof(float), cudaMemcpyHostToDevice);
+  genScoreKernel<<<grid, threads>>>(sizepernode, U_localscore, U_data, U_LG);
   cudaDeviceSynchronize();
-  cudaMemcpy(localscore, D_localscore, NODE_N * sizepernode * sizeof(float),
-             cudaMemcpyDeviceToHost);
+  // cudaDeviceSynchronize();
+  // cudaMemcpy(localscore, D_localscore, NODE_N * sizepernode * sizeof(float),
+  //  cudaMemcpyDeviceToHost);
 
   // cudaPrintfDisplay(stdout, true);
   // cudaPrintfEnd();
 
-  cudaFreeHost(LG);
-  cudaFree(D_LG);
-  cudaFree(D_data);
+  // cudaFreeHost(LG);
+  cudaFree(U_LG);
+  cudaFree(U_data);
 
-  cudaMallocHost((void **)&scores,
-                 (sizepernode / (256 * taskperthr) + 1) * sizeof(float));
-  cudaMallocHost((void **)&parents,
-                 (sizepernode / (256 * taskperthr) + 1) * 4 * sizeof(int));
-  cudaMalloc((void **)&D_Score,
-             (sizepernode / (256 * taskperthr) + 1) * sizeof(float));
-  cudaMalloc((void **)&D_parent, NODE_N * sizeof(bool));
-  cudaMalloc((void **)&D_resP,
-             (sizepernode / (256 * taskperthr) + 1) * 4 * sizeof(int));
+  cudaMallocManaged(&U_scores,
+                    (sizepernode / (256 * taskperthr) + 1) * sizeof(float));
+  // cudaMallocHost((void **)&parents,
+  //                (sizepernode / (256 * taskperthr) + 1) * 4 * sizeof(int));
+  // cudaMalloc((void **)&U_Score,
+  //            (sizepernode / (256 * taskperthr) + 1) * sizeof(float));
+  cudaMallocManaged(&U_parent, NODE_N * sizeof(bool));
+  cudaMallocManaged(&U_resP,
+                    (sizepernode / (256 * taskperthr) + 1) * 4 * sizeof(int));
 }
 
 int convert(int *parent, int parN) {
@@ -375,12 +384,12 @@ int convert(int *parent, int parN) {
 
 void Pre_logGamma() {
 
-  cudaMallocHost((void **)&LG, (DATA_N + 2) * sizeof(float));
-
-  LG[1] = log(1.0);
+  // cudaMallocHost((void **)&LG, (DATA_N + 2) * sizeof(float));
+  cudaMallocManaged(&U_LG, (DATA_N + 2) * sizeof(float));
+  U_LG[1] = log(1.0);
   float i;
   for (i = 2; i <= DATA_N + 1; i++) {
-    LG[(int)i] = LG[(int)i - 1] + log((float)i);
+    U_LG[(int)i] = U_LG[(int)i - 1] + log((float)i);
   }
 }
 
@@ -477,32 +486,35 @@ float findBestGraph() {
       taskperthr = 1;
       blocknum = total / (256 * taskperthr) + 1;
 
-      cudaMemset(D_resP, 0, blocknum * 4 * sizeof(int));
-      cudaMemset(D_Score, -999999.0, blocknum * sizeof(float));
-      cudaMemcpy(D_parent, orders[node], NODE_N * sizeof(bool),
-                 cudaMemcpyHostToDevice);
+      // cudaMemset(D_resP, 0, blocknum * 4 * sizeof(int));
+      cudaMemset(U_scores, -999999.0, blocknum * sizeof(float));
+      // cudaMemcpy(D_parent, orders[node], NODE_N * sizeof(bool),
+      //            cudaMemcpyHostToDevice);
+      for (int j = 0; j < NODE_N; j++) {
+        U_parent[j] = orders[node][j];
+      }
 
       computeKernel<<<blocknum, 256, 256 * sizeof(float)>>>(
-          taskperthr, sizepernode, D_localscore, D_parent, node, total, D_Score,
-          D_resP);
+          taskperthr, sizepernode, U_localscore, U_parent, node, total,
+          U_scores, U_resP);
       cudaDeviceSynchronize();
-      cudaMemcpy(parents, D_resP, blocknum * 4 * sizeof(int),
-                 cudaMemcpyDeviceToHost);
-      cudaMemcpy(scores, D_Score, blocknum * sizeof(float),
-                 cudaMemcpyDeviceToHost);
+      // cudaMemcpy(parents, D_resP, blocknum * 4 * sizeof(int),
+      //  cudaMemcpyDeviceToHost);
+      // cudaMemcpy(scores, D_Score, blocknum * sizeof(float),
+      //            cudaMemcpyDeviceToHost);
 
       for (i = 0; i < blocknum; i++) {
 
-        if (scores[i] > bestls) {
+        if (U_scores[i] > bestls) {
 
-          bestls = scores[i];
+          bestls = U_scores[i];
 
           parN = 0;
           for (tmp = 0; tmp < 4; tmp++) {
-            if (parents[i * 4 + tmp] < 0)
+            if (U_resP[i * 4 + tmp] < 0)
               break;
 
-            bestparent[tmp] = parents[i * 4 + tmp];
+            bestparent[tmp] = U_resP[i * 4 + tmp];
 
             parN++;
           }
@@ -536,7 +548,7 @@ float findBestGraph() {
 
                 index = findindex(parent, parN);
                 index += sizepernode * node;
-                ls = localscore[index];
+                ls = U_localscore[index];
 
                 if (ls > bestls) {
                   bestls = ls;
@@ -571,7 +583,7 @@ float findBestGraph() {
 
               index = findindex(parent, parN);
               index += sizepernode * node;
-              ls = localscore[index];
+              ls = U_localscore[index];
 
               if (ls > bestls) {
                 bestls = ls;
@@ -600,7 +612,7 @@ float findBestGraph() {
 
             index = findindex(parent, parN);
             index += sizepernode * node;
-            ls = localscore[index];
+            ls = U_localscore[index];
 
             if (ls > bestls) {
               bestls = ls;
@@ -623,7 +635,7 @@ float findBestGraph() {
 
           index = findindex(parent, parN);
           index += sizepernode * node;
-          ls = localscore[index];
+          ls = U_localscore[index];
 
           if (ls > bestls) {
             bestls = ls;
@@ -637,7 +649,7 @@ float findBestGraph() {
       parN = 0;
       index = sizepernode * node;
 
-      ls = localscore[index];
+      ls = U_localscore[index];
 
       if (ls > bestls) {
         bestls = ls;
