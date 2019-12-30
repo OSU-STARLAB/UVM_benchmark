@@ -11,3 +11,8 @@ Create the repo of UVM benchmarks
 
 
 ## Machine Learning Benchmarks
+
+1. Bayesian Network learning algorithm
+
+    Modify the original code and add data_generation code for generating new numbers of node from the given data file. 
+    [BN_Original](https://github.com/Emma926/BN-GPU)
