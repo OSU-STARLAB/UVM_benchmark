@@ -54,7 +54,7 @@ template <typename T>
 T* alloc(int N)
 {
 	T* t;
-	checkCudaErrors(cudaMalloc((void**)&t, sizeof(T)*N));
+	checkCudaErrors(cudaMallocManaged((void**)&t, sizeof(T)*N));
 	return t;
 }
 
@@ -84,13 +84,13 @@ void download(T* dst, T* src, int N)
 
 void dump(double* variables, int nel, int nelr)
 {
-	double* h_variables = new double[nelr*NVAR];
-	download(h_variables, variables, nelr*NVAR);
+	// double* h_variables = new double[nelr*NVAR];
+	// download(h_variables, variables, nelr*NVAR);
 
 	{
 		std::ofstream file("density");
 		file << nel << " " << nelr << std::endl;
-		for(int i = 0; i < nel; i++) file << h_variables[i + VAR_DENSITY*nelr] << std::endl;
+		for(int i = 0; i < nel; i++) file << variables[i + VAR_DENSITY*nelr] << std::endl;
 	}
 
 
@@ -100,7 +100,7 @@ void dump(double* variables, int nel, int nelr)
 		for(int i = 0; i < nel; i++)
 		{
 			for(int j = 0; j != NDIM; j++)
-				file << h_variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
+				file << variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
 			file << std::endl;
 		}
 	}
@@ -108,9 +108,9 @@ void dump(double* variables, int nel, int nelr)
 	{
 		std::ofstream file("density_energy");
 		file << nel << " " << nelr << std::endl;
-		for(int i = 0; i < nel; i++) file << h_variables[i + VAR_DENSITY_ENERGY*nelr] << std::endl;
+		for(int i = 0; i < nel; i++) file << variables[i + VAR_DENSITY_ENERGY*nelr] << std::endl;
 	}
-	delete[] h_variables;
+	// delete[] h_variables;
 }
 
 /*
@@ -466,26 +466,26 @@ int main(int argc, char** argv)
 	
 		file >> nel;
 		nelr = block_length*((nel / block_length )+ std::min(1, nel % block_length));
+		areas = alloc<double>(nelr);
+		elements_surrounding_elements = alloc<int>(nelr*NNB);
+		normals = alloc<double>(nelr*NDIM*NNB);
 
-		double* h_areas = new double[nelr];
-		int* h_elements_surrounding_elements = new int[nelr*NNB];
-		double* h_normals = new double[nelr*NDIM*NNB];
 
 				
 		// read in data
 		for(int i = 0; i < nel; i++)
 		{
-			file >> h_areas[i];
+			file >> areas[i];
 			for(int j = 0; j < NNB; j++)
 			{
-				file >> h_elements_surrounding_elements[i + j*nelr];
-				if(h_elements_surrounding_elements[i+j*nelr] < 0) h_elements_surrounding_elements[i+j*nelr] = -1;
-				h_elements_surrounding_elements[i + j*nelr]--; //it's coming in with Fortran numbering				
+				file >> elements_surrounding_elements[i + j*nelr];
+				if(elements_surrounding_elements[i+j*nelr] < 0) elements_surrounding_elements[i+j*nelr] = -1;
+				elements_surrounding_elements[i + j*nelr]--; //it's coming in with Fortran numbering				
 				
 				for(int k = 0; k < NDIM; k++)
 				{
-					file >> h_normals[i + (j + k*NNB)*nelr];
-					h_normals[i + (j + k*NNB)*nelr] = -h_normals[i + (j + k*NNB)*nelr];
+					file >> normals[i + (j + k*NNB)*nelr];
+					normals[i + (j + k*NNB)*nelr] = -normals[i + (j + k*NNB)*nelr];
 				}
 			}
 		}
@@ -494,27 +494,27 @@ int main(int argc, char** argv)
 		int last = nel-1;
 		for(int i = nel; i < nelr; i++)
 		{
-			h_areas[i] = h_areas[last];
+			areas[i] = areas[last];
 			for(int j = 0; j < NNB; j++)
 			{
 				// duplicate the last element
-				h_elements_surrounding_elements[i + j*nelr] = h_elements_surrounding_elements[last + j*nelr];	
-				for(int k = 0; k < NDIM; k++) h_normals[last + (j + k*NNB)*nelr] = h_normals[last + (j + k*NNB)*nelr];
+				elements_surrounding_elements[i + j*nelr] = elements_surrounding_elements[last + j*nelr];	
+				for(int k = 0; k < NDIM; k++) normals[last + (j + k*NNB)*nelr] = normals[last + (j + k*NNB)*nelr];
 			}
 		}
 		
-		areas = alloc<double>(nelr);
-		upload<double>(areas, h_areas, nelr);
 
-		elements_surrounding_elements = alloc<int>(nelr*NNB);
-		upload<int>(elements_surrounding_elements, h_elements_surrounding_elements, nelr*NNB);
+		// upload<double>(areas, h_areas, nelr);
 
-		normals = alloc<double>(nelr*NDIM*NNB);
-		upload<double>(normals, h_normals, nelr*NDIM*NNB);
+
+		// upload<int>(elements_surrounding_elements, h_elements_surrounding_elements, nelr*NNB);
+
+
+		// upload<double>(normals, h_normals, nelr*NDIM*NNB);
 				
-		delete[] h_areas;
-		delete[] h_elements_surrounding_elements;
-		delete[] h_normals;
+		// delete[] h_areas;
+		// delete[] h_elements_surrounding_elements;
+		// delete[] h_normals;
 	}
 
 	// Create arrays and set initial conditions

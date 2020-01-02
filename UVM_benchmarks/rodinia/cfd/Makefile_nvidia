@@ -41,4 +41,4 @@ CUFILES		:= euler3d.cu
 ################################################################################
 # Rules and targets
 
-include ../../common/common.mk
+include ../../../common/common.mk

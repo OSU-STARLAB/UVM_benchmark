@@ -6,6 +6,7 @@
 #include <helper_timer.h>
 #include <iostream>
 #include <fstream>
+#include <cuda.h>
 
  
  
@@ -102,7 +103,7 @@ template <typename T>
 T* alloc(int N)
 {
 	T* t;
-	checkCudaErrors(cudaMalloc((void**)&t, sizeof(T)*N));
+	checkCudaErrors(cudaMallocManaged(&t, sizeof(T)*N));
 	return t;
 }
 
@@ -132,13 +133,13 @@ void download(T* dst, T* src, int N)
 
 void dump(float* variables, int nel, int nelr)
 {
-	float* h_variables = new float[nelr*NVAR];
-	download(h_variables, variables, nelr*NVAR);
+	// float* h_variables = new float[nelr*NVAR];
+	// download(h_variables, variables, nelr*NVAR);
 
 	{
 		std::ofstream file("density");
 		file << nel << " " << nelr << std::endl;
-		for(int i = 0; i < nel; i++) file << h_variables[i + VAR_DENSITY*nelr] << std::endl;
+		for(int i = 0; i < nel; i++) file << variables[i + VAR_DENSITY*nelr] << std::endl;
 	}
 
 
@@ -148,7 +149,7 @@ void dump(float* variables, int nel, int nelr)
 		for(int i = 0; i < nel; i++)
 		{
 			for(int j = 0; j != NDIM; j++)
-				file << h_variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
+				file << variables[i + (VAR_MOMENTUM+j)*nelr] << " ";
 			file << std::endl;
 		}
 	}
@@ -156,9 +157,9 @@ void dump(float* variables, int nel, int nelr)
 	{
 		std::ofstream file("density_energy");
 		file << nel << " " << nelr << std::endl;
-		for(int i = 0; i < nel; i++) file << h_variables[i + VAR_DENSITY_ENERGY*nelr] << std::endl;
+		for(int i = 0; i < nel; i++) file << variables[i + VAR_DENSITY_ENERGY*nelr] << std::endl;
 	}
-	delete[] h_variables;
+	// delete[] h_variables;
 }
 
 /*
@@ -483,31 +484,35 @@ int main(int argc, char** argv)
 	float* areas;
 	int* elements_surrounding_elements;
 	float* normals;
+
 	{
 		std::ifstream file(data_file_name);
 	
 		file >> nel;
 		nelr = BLOCK_SIZE_0*((nel / BLOCK_SIZE_0 )+ std::min(1, nel % BLOCK_SIZE_0));
+		areas = alloc<float>(nelr);
+		elements_surrounding_elements = alloc<int>(nelr*NNB);
+		normals = alloc<float>(nelr*NDIM*NNB);
+		// float* h_areas = new float[nelr];
+		// int* h_elements_surrounding_elements = new int[nelr*NNB];
 
-		float* h_areas = new float[nelr];
-		int* h_elements_surrounding_elements = new int[nelr*NNB];
-		float* h_normals = new float[nelr*NDIM*NNB];
+		// float* h_normals = new float[nelr*NDIM*NNB];
 
 				
 		// read in data
 		for(int i = 0; i < nel; i++)
 		{
-			file >> h_areas[i];
+			file >> areas[i];
 			for(int j = 0; j < NNB; j++)
 			{
-				file >> h_elements_surrounding_elements[i + j*nelr];
-				if(h_elements_surrounding_elements[i+j*nelr] < 0) h_elements_surrounding_elements[i+j*nelr] = -1;
-				h_elements_surrounding_elements[i + j*nelr]--; //it's coming in with Fortran numbering				
+				file >> elements_surrounding_elements[i + j*nelr];
+				if(elements_surrounding_elements[i+j*nelr] < 0) elements_surrounding_elements[i+j*nelr] = -1;
+				elements_surrounding_elements[i + j*nelr]--; //it's coming in with Fortran numbering				
 				
 				for(int k = 0; k < NDIM; k++)
 				{
-					file >> h_normals[i + (j + k*NNB)*nelr];
-					h_normals[i + (j + k*NNB)*nelr] = -h_normals[i + (j + k*NNB)*nelr];
+					file >> normals[i + (j + k*NNB)*nelr];
+					normals[i + (j + k*NNB)*nelr] = -normals[i + (j + k*NNB)*nelr];
 				}
 			}
 		}
@@ -516,27 +521,27 @@ int main(int argc, char** argv)
 		int last = nel-1;
 		for(int i = nel; i < nelr; i++)
 		{
-			h_areas[i] = h_areas[last];
+			areas[i] = areas[last];
 			for(int j = 0; j < NNB; j++)
 			{
 				// duplicate the last element
-				h_elements_surrounding_elements[i + j*nelr] = h_elements_surrounding_elements[last + j*nelr];	
-				for(int k = 0; k < NDIM; k++) h_normals[last + (j + k*NNB)*nelr] = h_normals[last + (j + k*NNB)*nelr];
+				elements_surrounding_elements[i + j*nelr] = elements_surrounding_elements[last + j*nelr];	
+				for(int k = 0; k < NDIM; k++) normals[last + (j + k*NNB)*nelr] = normals[last + (j + k*NNB)*nelr];
 			}
 		}
 		
-		areas = alloc<float>(nelr);
-		upload<float>(areas, h_areas, nelr);
+		// areas = alloc<float>(nelr);
+		// upload<float>(areas, h_areas, nelr);
 
-		elements_surrounding_elements = alloc<int>(nelr*NNB);
-		upload<int>(elements_surrounding_elements, h_elements_surrounding_elements, nelr*NNB);
+		// elements_surrounding_elements = alloc<int>(nelr*NNB);
+		// upload<int>(elements_surrounding_elements, h_elements_surrounding_elements, nelr*NNB);
 
-		normals = alloc<float>(nelr*NDIM*NNB);
-		upload<float>(normals, h_normals, nelr*NDIM*NNB);
+		// normals = alloc<float>(nelr*NDIM*NNB);
+		// upload<float>(normals, h_normals, nelr*NDIM*NNB);
 				
-		delete[] h_areas;
-		delete[] h_elements_surrounding_elements;
-		delete[] h_normals;
+		// delete[] h_areas;
+		// delete[] h_elements_surrounding_elements;
+		// delete[] h_normals;
 	}
 
 	// Create arrays and set initial conditions
@@ -552,7 +557,7 @@ int main(int argc, char** argv)
 	initialize_variables(nelr, fluxes);
 	cudaMemset( (void*) step_factors, 0, sizeof(float)*nelr );
 	// make sure CUDA isn't still doing something before we start timing
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 
 	// these need to be computed the first time in order to compute time step
 	std::cout << "Starting..." << std::endl;
@@ -582,7 +587,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	//	CUT_SAFE_CALL( cutStopTimer(timer) );  
 	sdkStopTimer(&timer); 
 
