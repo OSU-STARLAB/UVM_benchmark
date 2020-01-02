@@ -1,8 +1,8 @@
-include ../../common/make.config
+include ../../../common/make.config
 
 # C compiler
 CC = gcc
-CC_FLAGS = -g  -O2
+CC_FLAGS = -g  -O2 -I$(CUDA_DIR)/include
 
 # CUDA compiler
 NVCC = $(CUDA_DIR)/bin/nvcc
