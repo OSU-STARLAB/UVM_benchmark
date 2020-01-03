@@ -54,7 +54,7 @@ __global__ void hotspotOpt1(float *p, float* tIn, float *tOut, float sdc,
     return;
 }
 
-void hotspot_opt1(float *p, float *tIn, float *tOut,
+void hotspot_opt1(float *p_d, float *tIn_d, float *tOut_d,
         int nx, int ny, int nz,
         float Cap, 
         float Rx, float Ry, float Rz, 
@@ -68,13 +68,13 @@ void hotspot_opt1(float *p, float *tIn, float *tOut,
 
     cc = 1.0 - (2.0*ce + 2.0*cn + 3.0*ct);
 
-    size_t s = sizeof(float) * nx * ny * nz;  
-    float  *tIn_d, *tOut_d, *p_d;
-    cudaMalloc((void**)&p_d,s);
-    cudaMalloc((void**)&tIn_d,s);
-    cudaMalloc((void**)&tOut_d,s);
-    cudaMemcpy(tIn_d, tIn, s, cudaMemcpyHostToDevice);
-    cudaMemcpy(p_d, p, s, cudaMemcpyHostToDevice);
+    // size_t s = sizeof(float) * nx * ny * nz;  
+    // float  *tIn_d, *tOut_d, *p_d;
+    // cudaMalloc((void**)&p_d,s);
+    // cudaMalloc((void**)&tIn_d,s);
+    // cudaMalloc((void**)&tOut_d,s);
+    // cudaMemcpy(tIn_d, tIn, s, cudaMemcpyHostToDevice);
+    // cudaMemcpy(p_d, p, s, cudaMemcpyHostToDevice);
 
     cudaFuncSetCacheConfig(hotspotOpt1, cudaFuncCachePreferL1);
 
@@ -93,10 +93,10 @@ void hotspot_opt1(float *p, float *tIn, float *tOut,
     long long stop = get_time();
     float time = (float)((stop - start)/(1000.0 * 1000.0));
     printf("Time: %.3f (s)\n",time);
-    cudaMemcpy(tOut, tOut_d, s, cudaMemcpyDeviceToHost);
-    cudaFree(p_d);
-    cudaFree(tIn_d);
-    cudaFree(tOut_d);
+    // cudaMemcpy(tOut, tOut_d, s, cudaMemcpyDeviceToHost);
+    // cudaFree(p_d);
+    // cudaFree(tIn_d);
+    // cudaFree(tOut_d);
     return;
 }
 
