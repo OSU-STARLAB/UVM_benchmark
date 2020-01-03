@@ -55,7 +55,7 @@ int
 main( int argc, char** argv) 
 {
 
-  printf("WG size of kernel = %d \n", BLOCK_SIZE);
+	printf("WG size of kernel = %d \n", BLOCK_SIZE);
 
     runTest( argc, argv);
 
@@ -73,11 +73,9 @@ void usage(int argc, char **argv)
 void runTest( int argc, char** argv) 
 {
     int max_rows, max_cols, penalty;
-    int *input_itemsets, *output_itemsets, *referrence;
-	int *matrix_cuda,  *referrence_cuda;
+    int *input_itemsets, *referrence_cuda;
 	int size;
-	
-    
+	    
     // the lengths of the two sequences should be able to divided by 16.
 	// And at current stage  max_rows needs to equal max_cols
 	if (argc == 3)
@@ -86,31 +84,37 @@ void runTest( int argc, char** argv)
 		max_cols = atoi(argv[1]);
 		penalty = atoi(argv[2]);
 	}
-    else{
-	usage(argc, argv);
+	else
+	{
+		usage(argc, argv);
     }
 	
-	if(atoi(argv[1])%16!=0){
-	fprintf(stderr,"The dimension values must be a multiple of 16\n");
-	exit(1);
+	if (atoi(argv[1]) % 16 != 0)
+	{
+		fprintf(stderr,"The dimension values must be a multiple of 16\n");
+		exit(1);
 	}
 	
 
 	max_rows = max_rows + 1;
 	max_cols = max_cols + 1;
-	referrence = (int *)malloc( max_rows * max_cols * sizeof(int) );
-    input_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
-	output_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
+	// referrence = (int *)malloc( max_rows * max_cols * sizeof(int) );
+    // input_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
+    size = max_cols * max_rows;
+	// output_itemsets = (int *)malloc( size * sizeof(int) );
 	
+	cudaMallocManaged(&referrence_cuda, sizeof(int)*size);
+	cudaMallocManaged(&input_itemsets, sizeof(int)*size);
 
 	if (!input_itemsets)
 		fprintf(stderr, "error: can not allocate memory");
 
     srand ( 7 );
-	
-	
-    for (int i = 0 ; i < max_cols; i++){
-		for (int j = 0 ; j < max_rows; j++){
+		
+	for (int i = 0 ; i < max_cols; i++)
+	{
+		for (int j = 0 ; j < max_rows; j++)
+		{
 			input_itemsets[i*max_cols+j] = 0;
 		}
 	}
@@ -127,7 +131,7 @@ void runTest( int argc, char** argv)
 
 	for (int i = 1 ; i < max_cols; i++){
 		for (int j = 1 ; j < max_rows; j++){
-		referrence[i*max_cols+j] = blosum62[input_itemsets[i*max_cols]][input_itemsets[j]];
+		referrence_cuda[i*max_cols+j] = blosum62[input_itemsets[i*max_cols]][input_itemsets[j]];
 		}
 	}
 
@@ -137,12 +141,11 @@ void runTest( int argc, char** argv)
        input_itemsets[j] = -j * penalty;
 
 
-    size = max_cols * max_rows;
-	cudaMalloc((void**)& referrence_cuda, sizeof(int)*size);
-	cudaMalloc((void**)& matrix_cuda, sizeof(int)*size);
+	// cudaMalloc((void**)& referrence_cuda, sizeof(int)*size);
+	// cudaMalloc((void**)& matrix_cuda, sizeof(int)*size);
 	
-	cudaMemcpy(referrence_cuda, referrence, sizeof(int) * size, cudaMemcpyHostToDevice);
-	cudaMemcpy(matrix_cuda, input_itemsets, sizeof(int) * size, cudaMemcpyHostToDevice);
+	// cudaMemcpy(referrence_cuda, referrence, sizeof(int) * size, cudaMemcpyHostToDevice);
+	// cudaMemcpy(matrix_cuda, input_itemsets, sizeof(int) * size, cudaMemcpyHostToDevice);
 
     dim3 dimGrid;
 	dim3 dimBlock(BLOCK_SIZE, 1);
@@ -153,7 +156,7 @@ void runTest( int argc, char** argv)
 	for( int i = 1 ; i <= block_width ; i++){
 		dimGrid.x = i;
 		dimGrid.y = 1;
-		needle_cuda_shared_1<<<dimGrid, dimBlock>>>(referrence_cuda, matrix_cuda
+		needle_cuda_shared_1<<<dimGrid, dimBlock>>>(referrence_cuda, input_itemsets
 		                                      ,max_cols, penalty, i, block_width); 
 	}
 	printf("Processing bottom-right matrix\n");
@@ -161,12 +164,12 @@ void runTest( int argc, char** argv)
 	for( int i = block_width - 1  ; i >= 1 ; i--){
 		dimGrid.x = i;
 		dimGrid.y = 1;
-		needle_cuda_shared_2<<<dimGrid, dimBlock>>>(referrence_cuda, matrix_cuda
+		needle_cuda_shared_2<<<dimGrid, dimBlock>>>(referrence_cuda, input_itemsets
 		                                      ,max_cols, penalty, i, block_width); 
 	}
 
 
-    cudaMemcpy(output_itemsets, matrix_cuda, sizeof(int) * size, cudaMemcpyDeviceToHost);
+    // cudaMemcpy(output_itemsets, matrix_cuda, sizeof(int) * size, cudaMemcpyDeviceToHost);
 	
 //#define TRACEBACK
 #ifdef TRACEBACK
@@ -177,28 +180,28 @@ void runTest( int argc, char** argv)
 	for (int i = max_rows - 2,  j = max_rows - 2; i>=0, j>=0;){
 		int nw, n, w, traceback;
 		if ( i == max_rows - 2 && j == max_rows - 2 )
-			fprintf(fpo, "%d ", output_itemsets[ i * max_cols + j]); //print the first element
+			fprintf(fpo, "%d ", input_itemsets[ i * max_cols + j]); //print the first element
 		if ( i == 0 && j == 0 )
            break;
 		if ( i > 0 && j > 0 ){
-			nw = output_itemsets[(i - 1) * max_cols + j - 1];
-		    w  = output_itemsets[ i * max_cols + j - 1 ];
-            n  = output_itemsets[(i - 1) * max_cols + j];
+			nw = input_itemsets[(i - 1) * max_cols + j - 1];
+		    w  = input_itemsets[ i * max_cols + j - 1 ];
+            n  = input_itemsets[(i - 1) * max_cols + j];
 		}
 		else if ( i == 0 ){
 		    nw = n = LIMIT;
-		    w  = output_itemsets[ i * max_cols + j - 1 ];
+		    w  = input_itemsets[ i * max_cols + j - 1 ];
 		}
 		else if ( j == 0 ){
 		    nw = w = LIMIT;
-            n  = output_itemsets[(i - 1) * max_cols + j];
+            n  = input_itemsets[(i - 1) * max_cols + j];
 		}
 		else{
 		}
 
 		//traceback = maximum(nw, w, n);
 		int new_nw, new_w, new_n;
-		new_nw = nw + referrence[i * max_cols + j];
+		new_nw = nw + referrence_cuda[i * max_cols + j];
 		new_w = w - penalty;
 		new_n = n - penalty;
 		
@@ -230,11 +233,11 @@ void runTest( int argc, char** argv)
 #endif
 
 	cudaFree(referrence_cuda);
-	cudaFree(matrix_cuda);
+	cudaFree(input_itemsets);
 
-	free(referrence);
-	free(input_itemsets);
-	free(output_itemsets);
+	// free(referrence);
+	// free(input_itemsets);
+	// free(output_itemsets);
 	
 }
 
