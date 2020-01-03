@@ -44,7 +44,7 @@ void
 runTest( int argc, char** argv) 
 {
     int rows, cols, size_I, size_R, niter = 10, iter;
-    float *I, *J, lambda, q0sqr, sum, sum2, tmp, meanROI,varROI ;
+    float *I, lambda, q0sqr, sum, sum2, tmp, meanROI,varROI ;
 
 #ifdef CPU
 	float Jc, G2, L, num, den, qsqr;
@@ -92,7 +92,7 @@ runTest( int argc, char** argv)
     size_R = (r2-r1+1)*(c2-c1+1);   
 
 	I = (float *)malloc( size_I * sizeof(float) );
-    J = (float *)malloc( size_I * sizeof(float) );
+    // J = (float *)malloc( size_I * sizeof(float) );
 	c  = (float *)malloc(sizeof(float)* size_I) ;
 
 
@@ -128,12 +128,12 @@ runTest( int argc, char** argv)
 #ifdef GPU
 
 	//Allocate device memory
-    cudaMalloc((void**)& J_cuda, sizeof(float)* size_I);
-    cudaMalloc((void**)& C_cuda, sizeof(float)* size_I);
-	cudaMalloc((void**)& E_C, sizeof(float)* size_I);
-	cudaMalloc((void**)& W_C, sizeof(float)* size_I);
-	cudaMalloc((void**)& S_C, sizeof(float)* size_I);
-	cudaMalloc((void**)& N_C, sizeof(float)* size_I);
+    cudaMallocManaged(& J_cuda, sizeof(float)* size_I);
+    cudaMallocManaged(& C_cuda, sizeof(float)* size_I);
+	cudaMallocManaged(& E_C, 	sizeof(float)* size_I);
+	cudaMallocManaged(& W_C, 	sizeof(float)* size_I);
+	cudaMallocManaged(& S_C, 	sizeof(float)* size_I);
+	cudaMallocManaged(& N_C, 	sizeof(float)* size_I);
 
 	
 #endif 
@@ -143,14 +143,14 @@ runTest( int argc, char** argv)
 	random_matrix(I, rows, cols);
 
     for (int k = 0;  k < size_I; k++ ) {
-     	J[k] = (float)exp(I[k]) ;
+		J_cuda[k] = (float)exp(I[k]) ;
     }
 	printf("Start the SRAD main loop\n");
  for (iter=0; iter< niter; iter++){     
 		sum=0; sum2=0;
         for (int i=r1; i<=r2; i++) {
             for (int j=c1; j<=c2; j++) {
-                tmp   = J[i * cols + j];
+                tmp   = J_cuda[i * cols + j];
                 sum  += tmp ;
                 sum2 += tmp*tmp;
             }
@@ -165,13 +165,13 @@ runTest( int argc, char** argv)
             for (int j = 0; j < cols; j++) { 
 		
 				k = i * cols + j;
-				Jc = J[k];
+				Jc = J_cuda[k];
  
 				// directional derivates
-                dN[k] = J[iN[i] * cols + j] - Jc;
-                dS[k] = J[iS[i] * cols + j] - Jc;
-                dW[k] = J[i * cols + jW[j]] - Jc;
-                dE[k] = J[i * cols + jE[j]] - Jc;
+                dN[k] = J_cuda[iN[i] * cols + j] - Jc;
+                dS[k] = J_cuda[iS[i] * cols + j] - Jc;
+                dW[k] = J_cuda[i * cols + jW[j]] - Jc;
+                dE[k] = J_cuda[i * cols + jE[j]] - Jc;
 			
                 G2 = (dN[k]*dN[k] + dS[k]*dS[k] 
                     + dW[k]*dW[k] + dE[k]*dE[k]) / (Jc*Jc);
@@ -207,7 +207,7 @@ runTest( int argc, char** argv)
                 D = cN * dN[k] + cS * dS[k] + cW * dW[k] + cE * dE[k];
                 
                 // image update (equ 61)
-                J[k] = J[k] + 0.25*lambda*D;
+                J_cuda[k] = J_cuda[k] + 0.25*lambda*D;
             }
 	}
 
@@ -215,7 +215,6 @@ runTest( int argc, char** argv)
 
 
 #ifdef GPU
-
 	//Currently the input size must be divided by 16 - the block size
 	int block_x = cols/BLOCK_SIZE ;
     int block_y = rows/BLOCK_SIZE ;
@@ -225,26 +224,26 @@ runTest( int argc, char** argv)
     
 
 	//Copy data from main memory to device memory
-	cudaMemcpy(J_cuda, J, sizeof(float) * size_I, cudaMemcpyHostToDevice);
+	// cudaMemcpy(J_cuda, J, sizeof(float) * size_I, cudaMemcpyHostToDevice);
 
 	//Run kernels
 	srad_cuda_1<<<dimGrid, dimBlock>>>(E_C, W_C, N_C, S_C, J_cuda, C_cuda, cols, rows, q0sqr); 
 	srad_cuda_2<<<dimGrid, dimBlock>>>(E_C, W_C, N_C, S_C, J_cuda, C_cuda, cols, rows, lambda, q0sqr); 
 
 	//Copy data from device memory to main memory
-    cudaMemcpy(J, J_cuda, sizeof(float) * size_I, cudaMemcpyDeviceToHost);
+    // cudaMemcpy(J, J_cuda, sizeof(float) * size_I, cudaMemcpyDeviceToHost);
 
 #endif   
 }
 
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
 
 #ifdef OUTPUT
     //Printing output	
 		printf("Printing Output:\n"); 
     for( int i = 0 ; i < rows ; i++){
 		for ( int j = 0 ; j < cols ; j++){
-         printf("%.5f ", J[i * cols + j]); 
+         printf("%.5f ", J_cuda[i * cols + j]); 
 		}	
      printf("\n"); 
    }
@@ -253,7 +252,7 @@ runTest( int argc, char** argv)
 	printf("Computation Done\n");
 
 	free(I);
-	free(J);
+	// free(J);
 #ifdef CPU
 	free(iN); free(iS); free(jW); free(jE);
     free(dN); free(dS); free(dW); free(dE);
