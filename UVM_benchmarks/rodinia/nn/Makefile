@@ -1,4 +1,4 @@
-include ../../common/make.config
+include ../../../common/make.config
 
 LOCAL_CC = gcc -g -O3 -Wall
 CC := $(CUDA_DIR)/bin/nvcc

@@ -13,7 +13,7 @@
 #define min( a, b )			a > b ? b : a
 #define ceilDiv( a, b )		( a + b - 1 ) / b
 #define print( x )			printf( #x ": %lu\n", (unsigned long) x )
-#define DEBUG				false
+#define DEBUG				true
 
 #define DEFAULT_THREADS_PER_BLOCK 256
 
@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
 	float lat, lng;
 	int quiet=0,timing=0,platform=0,device=0;
 
-    std::vector<Record> records;
+  std::vector<Record> records;
 	std::vector<LatLong> locations;
 	char filename[100];
 	int resultsCount=10;
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
 
     //Pointers to host memory
-	float *distances;
+	// float *distances;
 	//Pointers to device memory
 	LatLong *d_locations;
 	float *d_distances;
@@ -96,13 +96,13 @@ int main(int argc, char* argv[])
 	// Scaling calculations - added by Sam Kauffman
 	cudaDeviceProp deviceProp;
 	cudaGetDeviceProperties( &deviceProp, 0 );
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	unsigned long maxGridX = deviceProp.maxGridSize[0];
 	unsigned long threadsPerBlock = min( deviceProp.maxThreadsPerBlock, DEFAULT_THREADS_PER_BLOCK );
 	size_t totalDeviceMemory;
 	size_t freeDeviceMemory;
 	cudaMemGetInfo(  &freeDeviceMemory, &totalDeviceMemory );
-	cudaThreadSynchronize();
+	cudaDeviceSynchronize();
 	unsigned long usableDeviceMemory = freeDeviceMemory * 85 / 100; // 85% arbitrary throttle to compensate for known CUDA bug
 	unsigned long maxThreads = usableDeviceMemory / 12; // 4 bytes in 3 vectors per thread
 	if ( numRecords > maxThreads )
@@ -133,33 +133,36 @@ int main(int argc, char* argv[])
 	/**
 	* Allocate memory on host and device
 	*/
-	distances = (float *)malloc(sizeof(float) * numRecords);
-	cudaMalloc((void **) &d_locations,sizeof(LatLong) * numRecords);
-	cudaMalloc((void **) &d_distances,sizeof(float) * numRecords);
+	// distances = (float *)malloc(sizeof(float) * numRecords);
+	cudaMallocManaged(&d_locations,sizeof(LatLong) * numRecords);
+	cudaMallocManaged(&d_distances,sizeof(float) * numRecords);
 
-   /**
-    * Transfer data from host to device
-    */
-    cudaMemcpy( d_locations, &locations[0], sizeof(LatLong) * numRecords, cudaMemcpyHostToDevice);
+  memcpy(d_locations, &locations[0], sizeof(LatLong)*numRecords);
 
-    /**
-    * Execute kernel
-    */
-    euclid<<< gridDim, threadsPerBlock >>>(d_locations,d_distances,numRecords,lat,lng);
-    cudaThreadSynchronize();
+  /**
+  * Transfer data from host to device
+  */
+  // cudaMemcpy( d_locations, &locations[0], sizeof(LatLong) * numRecords, cudaMemcpyHostToDevice);
 
-    //Copy data from device memory to host memory
-    cudaMemcpy( distances, d_distances, sizeof(float)*numRecords, cudaMemcpyDeviceToHost );
+  /**
+  * Execute kernel
+  */
+  euclid<<< gridDim, threadsPerBlock >>>(d_locations,d_distances,numRecords,lat,lng);
+  cudaDeviceSynchronize();
+
+  //Copy data from device memory to host memory
+  // cudaMemcpy( distances, d_distances, sizeof(float)*numRecords, cudaMemcpyDeviceToHost );
 
 	// find the resultsCount least distances
-    findLowest(records,distances,numRecords,resultsCount);
+  findLowest(records,d_distances,numRecords,resultsCount);  
 
     // print out results
-    if (!quiet)
+  if (!quiet)
     for(i=0;i<resultsCount;i++) {
       printf("%s --> Distance=%f\n",records[i].recString,records[i].distance);
     }
-    free(distances);
+    // free(distances);
+    
     //Free memory
 	cudaFree(d_locations);
 	cudaFree(d_distances);
