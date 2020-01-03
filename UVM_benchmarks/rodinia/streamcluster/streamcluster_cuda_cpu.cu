@@ -342,7 +342,12 @@ float pFL(Points *points, int *feasible, int numfeasible,
 #endif
 	
     for (i=0;i<iter;i++) {
-	    x = i%numfeasible;
+      x = i%numfeasible;
+      #ifdef PRINTINFO
+        if( pid == 0 ) {
+          fprintf(stderr, "test_enter\n");
+        }
+      #endif
 	    change += pgain(feasible[x], points, z, k, kmax, is_center, center_table, switch_membership, isCoordChanged,
 						&serial_t, &cpu_to_gpu_t, &gpu_to_cpu_t, &alloc_t, &kernel_t, &free_t);
     }		
@@ -769,7 +774,8 @@ void streamCluster( PStream* stream,
   Points points;
   points.dim = dim;
   points.num = chunksize;
-  points.p = (Point *)malloc(chunksize*sizeof(Point));
+  // points.p = (Point *)malloc(chunksize*sizeof(Point));
+  cudaMallocManaged(&points.p, chunksize*sizeof(Point));
   for( int i = 0; i < chunksize; i++ ) {
     points.p[i].coord = &block[i*dim];		
   }
@@ -804,8 +810,8 @@ void streamCluster( PStream* stream,
 
     switch_membership = (bool*)malloc(points.num*sizeof(bool));
     is_center = (bool*)calloc(points.num,sizeof(bool));
-    center_table = (int*)malloc(points.num*sizeof(int));
-
+    // center_table = (int*)malloc(points.num*sizeof(int));
+    cudaMallocManaged(&center_table, points.num*sizeof(int));
     localSearch(&points,kmin, kmax,&kfinal);
 	
     fprintf(stderr,"finish local search\n");
@@ -832,7 +838,7 @@ void streamCluster( PStream* stream,
 	
     free(is_center);
     free(switch_membership);
-    free(center_table);
+    cudaFree(center_table);
 	
     if( stream->feof() ) {
       break;
@@ -842,11 +848,12 @@ void streamCluster( PStream* stream,
   //finally cluster all temp centers
   switch_membership = (bool*)malloc(centers.num*sizeof(bool));
   is_center = (bool*)calloc(centers.num,sizeof(bool));
-  center_table = (int*)malloc(centers.num*sizeof(int));
-  
+  // center_table = (int*)malloc(centers.num*sizeof(int));
+  cudaMallocManaged(&center_table, centers.num*sizeof(int));
   localSearch( &centers, kmin, kmax ,&kfinal );
   contcenters(&centers);
   outcenterIDs( &centers, centerIDs, outfile);
+  cudaFree(center_table);
 }
 
 int main(int argc, char **argv)

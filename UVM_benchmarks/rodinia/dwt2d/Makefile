@@ -9,7 +9,7 @@ cudagdb=0 #compile for use with cuda-gdb, note that 'dbg' must be 1 as well
 performancetest=1
 
 # NVCC Options
-NVCCFLAGS += -arch sm_20
+# NVCCFLAGS += -arch sm_20
 
 # Files
 CFILES := 
@@ -19,7 +19,7 @@ CUFILES := main.cu dwt.cu components.cu dwt_cuda/fdwt53.cu dwt_cuda/fdwt97.cu dw
 # Includes
 INCLUDES := -I. -I$(CUDA_INSTALL_PATH)/include
 
-include ../../common/make.config
+include ../../../common/make.config
 
 
 # Common flags

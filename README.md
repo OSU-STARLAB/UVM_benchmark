@@ -5,7 +5,6 @@ Create the repo of UVM benchmarks
 1. BFS 
 
     Modify Rodinia BFS dataset Generation program accordingly. Current generated data can be used by our BFS directly.  
-    
     [BFS_Original](https://github.com/rafalk342/bfs-cuda)
 
 
@@ -16,3 +15,8 @@ Create the repo of UVM benchmarks
 
     Modify the original code and add data_generation code for generating new numbers of node from the given data file. 
     [BN_Original](https://github.com/Emma926/BN-GPU)
+
+2. Kmeans 
+
+    Modify the original code. 
+    [Kmeans_Original](https://github.com/goldsborough/k-means)

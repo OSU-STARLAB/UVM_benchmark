@@ -93,10 +93,10 @@ kernel_compute_cost(int num, int dim, long x, Point *p, int K, int stride,
 //=======================================
 void allocDevMem(int num, int dim)
 {
-	CUDA_SAFE_CALL( cudaMalloc((void**) &center_table_d,	  num * sizeof(int))   );
-	CUDA_SAFE_CALL( cudaMalloc((void**) &switch_membership_d, num * sizeof(bool))  );
-	CUDA_SAFE_CALL( cudaMalloc((void**) &p,					  num * sizeof(Point)) );
-	CUDA_SAFE_CALL( cudaMalloc((void**) &coord_d,		num * dim * sizeof(float)) );
+	// CUDA_SAFE_CALL( cudaMallocManaged( &center_table_d,	  num * sizeof(int))   );
+	CUDA_SAFE_CALL( cudaMallocManaged( &switch_membership_d, num * sizeof(bool))  );
+	// CUDA_SAFE_CALL( cudaMallocManaged( &p,					  num * sizeof(Point)) );
+	CUDA_SAFE_CALL( cudaMallocManaged( &coord_d,		num * dim * sizeof(float)) );
 }
 
 //=======================================
@@ -112,9 +112,9 @@ void allocHostMem(int num, int dim)
 //=======================================
 void freeDevMem()
 {
-	CUDA_SAFE_CALL( cudaFree(center_table_d)	  );
+	// CUDA_SAFE_CALL( cudaFree(center_table_d)	  );
 	CUDA_SAFE_CALL( cudaFree(switch_membership_d) );
-	CUDA_SAFE_CALL( cudaFree(p)					  );
+	// CUDA_SAFE_CALL( cudaFree(p)					  );
 	CUDA_SAFE_CALL( cudaFree(coord_d)			  );
 }
 
@@ -129,7 +129,7 @@ void freeHostMem()
 //=======================================
 // pgain Entry - CUDA SETUP + CUDA CALL
 //=======================================
-float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bool *is_center, int *center_table, bool *switch_membership, bool isCoordChanged,
+float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bool *is_center, int *center_table_d, bool *switch_membership, bool isCoordChanged,
 							double *serial_t, double *cpu_to_gpu_t, double *gpu_to_cpu_t, double *alloc_t, double *kernel_t, double *free_t)
 {	
 #ifdef CUDATIME
@@ -152,36 +152,52 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	//=========================================
 	// ALLOCATE HOST MEMORY + DATA PREPARATION
 	//=========================================
-	work_mem_h = (float*) malloc(stride * (nThread + 1) * sizeof(float) );
+	// work_mem_h = (float*) malloc(stride * (nThread + 1) * sizeof(float) );
 	// Only on the first iteration
-	if(iter == 0)
-	{
-		allocHostMem(num, dim);
-	}
+	// if(iter == 0)
+	// {
+	// 	allocHostMem(num, dim);
+	// }
 	
 	// build center-index table
+	#ifdef PRINTINFO
+	  fprintf(stderr, "test_1\n");
+  #endif
 	int count = 0;
 	for( int i=0; i<num; i++)
 	{
 		if( is_center[i] )
 		{
-			center_table[i] = count++;
+			center_table_d[i] = count++;
 		}
 	}
-
+	#ifdef PRINTINFO
+	  fprintf(stderr, "test_2\n");
+  	#endif
 	// Extract 'coord'
 	// Only if first iteration OR coord has changed
+	if( iter == 0 )
+	{
+		allocDevMem(num, dim);
+	}
+	
+	#ifdef PRINTINFO
+	  fprintf(stderr, "test_3\n");
+  	#endif
 	if(isCoordChanged || iter == 0)
 	{
 		for(int i=0; i<dim; i++)
 		{
 			for(int j=0; j<num; j++)
 			{
-				coord_h[ (num*i)+j ] = points->p[j].coord[i];
+				coord_d[ (num*i)+j ] = points->p[j].coord[i];
 			}
 		}
 	}
-	
+	#ifdef PRINTINFO
+	  fprintf(stderr, "test_4\n");
+  	#endif
+
 #ifdef CUDATIME
 	cudaEventRecord(stop,0);
 	cudaEventSynchronize(stop);
@@ -194,12 +210,9 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	//=======================================
 	// ALLOCATE GPU MEMORY
 	//=======================================
-	CUDA_SAFE_CALL( cudaMalloc((void**) &work_mem_d,  stride * (nThread + 1) * sizeof(float)) );
+	CUDA_SAFE_CALL( cudaMallocManaged( &work_mem_d,  stride * (nThread + 1) * sizeof(float)) );
 	// Only on the first iteration
-	if( iter == 0 )
-	{
-		allocDevMem(num, dim);
-	}
+
 	
 #ifdef CUDATIME
 	cudaEventRecord(stop,0);
@@ -214,16 +227,18 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	// CPU-TO-GPU MEMORY COPY
 	//=======================================
 	// Only if first iteration OR coord has changed
-	if(isCoordChanged || iter == 0)
-	{
-		CUDA_SAFE_CALL( cudaMemcpy(coord_d,  coord_h,	 num * dim * sizeof(float), cudaMemcpyHostToDevice) );
-	}
-	CUDA_SAFE_CALL( cudaMemcpy(center_table_d,  center_table,  num * sizeof(int),   cudaMemcpyHostToDevice) );
-	CUDA_SAFE_CALL( cudaMemcpy(p,  points->p,				   num * sizeof(Point), cudaMemcpyHostToDevice) );
+	// if(isCoordChanged || iter == 0)
+	// {
+	// 	CUDA_SAFE_CALL( cudaMemcpy(coord_d,  coord_h,	 num * dim * sizeof(float), cudaMemcpyHostToDevice) );
+	// }
+	// CUDA_SAFE_CALL( cudaMemcpy(center_table_d,  center_table,  num * sizeof(int),   cudaMemcpyHostToDevice) );
+	// CUDA_SAFE_CALL( cudaMemcpy(p,  points->p,				   num * sizeof(Point), cudaMemcpyHostToDevice) );
 	
 	CUDA_SAFE_CALL( cudaMemset((void*) switch_membership_d, 0,			num * sizeof(bool))  );
 	CUDA_SAFE_CALL( cudaMemset((void*) work_mem_d,  		0, stride * (nThread + 1) * sizeof(float)) );
-	
+	#ifdef PRINTINFO
+	fprintf(stderr, "test_5\n");
+	#endif
 #ifdef CUDATIME
 	cudaEventRecord(stop,0);
 	cudaEventSynchronize(stop);
@@ -246,7 +261,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 															num,					// in:	# of data
 															dim,					// in:	dimension of point coordinates
 															x,						// in:	point to open a center at
-															p,						// in:	data point array
+															points->p,						// in:	data point array
 															K,						// in:	number of centers
 															stride,					// in:  size of each work_mem segment
 															coord_d,				// in:	array of point coordinates
@@ -254,8 +269,10 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 															center_table_d,			// in:	center index table
 															switch_membership_d		// out:  changes in membership
 															);
-	cudaThreadSynchronize();
-	
+	cudaDeviceSynchronize();
+	#ifdef PRINTINFO
+	fprintf(stderr, "test_6\n");
+	#endif
 	// error check
 	error = cudaGetLastError();
 	if (error != cudaSuccess)
@@ -276,8 +293,8 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	//=======================================
 	// GPU-TO-CPU MEMORY COPY
 	//=======================================
-	CUDA_SAFE_CALL( cudaMemcpy(work_mem_h, 		  work_mem_d, 	stride * (nThread + 1) * sizeof(float), cudaMemcpyDeviceToHost) );
-	CUDA_SAFE_CALL( cudaMemcpy(switch_membership, switch_membership_d,	 num * sizeof(bool),  cudaMemcpyDeviceToHost) );
+	// CUDA_SAFE_CALL( cudaMemcpy(work_mem_h, 		  work_mem_d, 	stride * (nThread + 1) * sizeof(float), cudaMemcpyDeviceToHost) );
+	// CUDA_SAFE_CALL( cudaMemcpy(switch_membership, switch_membership_d,	 num * sizeof(bool),  cudaMemcpyDeviceToHost) );
 	
 #ifdef CUDATIME
 	cudaEventRecord(stop,0);
@@ -293,7 +310,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	//=======================================
 	int number_of_centers_to_close = 0;
 	float gl_cost_of_opening_x = z;
-	float *gl_lower = &work_mem_h[stride * nThread];
+	float *gl_lower = &work_mem_d[stride * nThread];
 	// compute the number of centers to close if we are to open i
 	for(int i=0; i < num; i++)
 	{
@@ -302,36 +319,41 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 			float low = z;
 		    for( int j = 0; j < num; j++ )
 			{
-				low += work_mem_h[ j*stride + center_table[i] ];
+				low += work_mem_d[ j*stride + center_table_d[i] ];
 			}
 			
-		    gl_lower[center_table[i]] = low;
+		    gl_lower[center_table_d[i]] = low;
 				
 		    if ( low > 0 )
 			{
 				++number_of_centers_to_close;
-				work_mem_h[i*stride+K] -= low;
+				work_mem_d[i*stride+K] -= low;
 		    }
 		}
-		gl_cost_of_opening_x += work_mem_h[i*stride+K];
+		gl_cost_of_opening_x += work_mem_d[i*stride+K];
 	}
+	#ifdef PRINTINFO
+	fprintf(stderr, "test_7\n");
+	#endif
 
 	//if opening a center at x saves cost (i.e. cost is negative) do so; otherwise, do nothing
 	if ( gl_cost_of_opening_x < 0 )
 	{
 		for(int i = 0; i < num; i++)
 		{
-			bool close_center = gl_lower[center_table[points->p[i].assign]] > 0 ;
-			if ( switch_membership[i] || close_center )
+			bool close_center = gl_lower[center_table_d[points->p[i].assign]] > 0 ;
+			if ( switch_membership_d[i] || close_center )
 			{
 				points->p[i].cost = dist(points->p[i], points->p[x], dim) * points->p[i].weight;
 				points->p[i].assign = x;
 			}
 		}
-		
+		#ifdef PRINTINFO
+		fprintf(stderr, "test_8\n");
+		#endif
 		for(int i = 0; i < num; i++)
 		{
-			if( is_center[i] && gl_lower[center_table[i]] > 0 )
+			if( is_center[i] && gl_lower[center_table_d[i]] > 0 )
 			{
 				is_center[i] = false;
 			}
@@ -342,6 +364,9 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 			is_center[x] = true;
 		}
 		*numcenters = *numcenters + 1 - number_of_centers_to_close;
+		#ifdef PRINTINFO
+		fprintf(stderr, "test_9\n");
+		#endif
 	}
 	else
 	{
@@ -351,7 +376,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	//=======================================
 	// DEALLOCATE HOST MEMORY
 	//=======================================
-	free(work_mem_h);
+	// free(work_mem_h);
 	
 	
 #ifdef CUDATIME
