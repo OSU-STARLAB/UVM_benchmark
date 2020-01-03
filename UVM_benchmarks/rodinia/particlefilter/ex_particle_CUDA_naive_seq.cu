@@ -438,36 +438,44 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 	}
 	long long get_weights = get_time();
 	printf("TIME TO GET WEIGHTSTOOK: %f\n", elapsed_time(get_neighbors, get_weights));
+	
 	//initial likelihood to 0.0
 	double * likelihood = (double *)malloc(sizeof(double)*Nparticles);
-	double * arrayX = (double *)malloc(sizeof(double)*Nparticles);
-	double * arrayY = (double *)malloc(sizeof(double)*Nparticles);
-	double * xj = (double *)malloc(sizeof(double)*Nparticles);
-	double * yj = (double *)malloc(sizeof(double)*Nparticles);
-	double * CDF = (double *)malloc(sizeof(double)*Nparticles);
+	int * ind = (int*)malloc(sizeof(int)*countOnes);
+	// double * arrayX = (double *)malloc(sizeof(double)*Nparticles);
+	// double * arrayY = (double *)malloc(sizeof(double)*Nparticles);
+	// double * xj = (double *)malloc(sizeof(double)*Nparticles);
+	// double * yj = (double *)malloc(sizeof(double)*Nparticles);
+	// double * CDF = (double *)malloc(sizeof(double)*Nparticles);
 	
 	//GPU copies of arrays
-	double * arrayX_GPU;
-	double * arrayY_GPU;
-	double * xj_GPU;
-	double * yj_GPU;
-	double * CDF_GPU;
+	double * arrayX_u;
+	double * arrayY_u;
+	double * xj_u;
+	double * yj_u;
+	double * CDF_u;
+	double * u_u;
 	
-	int * ind = (int*)malloc(sizeof(int)*countOnes);
-	double * u = (double *)malloc(sizeof(double)*Nparticles);
-	double * u_GPU;
+	// double * u = (double *)malloc(sizeof(double)*Nparticles);
 	
 	//CUDA memory allocation
-	check_error(cudaMalloc((void **) &arrayX_GPU, sizeof(double)*Nparticles));
-	check_error(cudaMalloc((void **) &arrayY_GPU, sizeof(double)*Nparticles));
-	check_error(cudaMalloc((void **) &xj_GPU, sizeof(double)*Nparticles));
-	check_error(cudaMalloc((void **) &yj_GPU, sizeof(double)*Nparticles));
-	check_error(cudaMalloc((void **) &CDF_GPU, sizeof(double)*Nparticles));
-	check_error(cudaMalloc((void **) &u_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &arrayX_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &arrayY_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &xj_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &yj_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &CDF_GPU, sizeof(double)*Nparticles));
+	// check_error(cudaMalloc((void **) &u_GPU, sizeof(double)*Nparticles));
 	
+	check_error(cudaMallocManaged(&arrayX_u, sizeof(double)*Nparticles));
+	check_error(cudaMallocManaged(&arrayY_u, sizeof(double)*Nparticles));
+	check_error(cudaMallocManaged(&xj_u, sizeof(double)*Nparticles));
+	check_error(cudaMallocManaged(&yj_u, sizeof(double)*Nparticles));
+	check_error(cudaMallocManaged(&CDF_u, sizeof(double)*Nparticles));
+	check_error(cudaMallocManaged(&u_u, sizeof(double)*Nparticles));
+
 	for(x = 0; x < Nparticles; x++){
-		arrayX[x] = xe;
-		arrayY[x] = ye;
+		arrayX_u[x] = xe;
+		arrayY_u[x] = ye;
 	}
 	int k;
 	//double * Ik = (double *)malloc(sizeof(double)*IszX*IszY);
@@ -480,8 +488,8 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 		//is that the object moves 2x as fast as in the y direction
 		
 		for(x = 0; x < Nparticles; x++){
-			arrayX[x] = arrayX[x] + 1.0 + 5.0*randn(seed, x);
-			arrayY[x] = arrayY[x] - 2.0 + 2.0*randn(seed, x);
+			arrayX_u[x] = arrayX_u[x] + 1.0 + 5.0*randn(seed, x);
+			arrayY_u[x] = arrayY_u[x] - 2.0 + 2.0*randn(seed, x);
 		}
 		//particle filter likelihood
 		long long error = get_time();
@@ -494,8 +502,8 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 			// p(z|x). It is possible in this case. why? a hometask for you.		
 			//calc ind
 			for(y = 0; y < countOnes; y++){
-				indX = roundDouble(arrayX[x]) + objxy[y*2 + 1];
-				indY = roundDouble(arrayY[x]) + objxy[y*2];
+				indX = roundDouble(arrayX_u[x]) + objxy[y*2 + 1];
+				indY = roundDouble(arrayY_u[x]) + objxy[y*2];
 				ind[y] = fabs(indX*IszY*Nfr + indY*Nfr + k);
 				if(ind[y] >= max_size)
 					ind[y] = 0;
@@ -527,8 +535,8 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 		ye = 0;
 		// estimate the object location by expected values
 		for(x = 0; x < Nparticles; x++){
-			xe += arrayX[x] * weights[x];
-			ye += arrayY[x] * weights[x];
+			xe += arrayX_u[x] * weights[x];
+			ye += arrayY_u[x] * weights[x];
 		}
 		long long move_time = get_time();
 		printf("TIME TO MOVE OBJECT TOOK: %f\n", elapsed_time(normalize, move_time));
@@ -543,37 +551,37 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 		//resampling
 		
 		
-		CDF[0] = weights[0];
+		CDF_u[0] = weights[0];
 		for(x = 1; x < Nparticles; x++){
-			CDF[x] = weights[x] + CDF[x-1];
+			CDF_u[x] = weights[x] + CDF_u[x-1];
 		}
 		long long cum_sum = get_time();
 		printf("TIME TO CALC CUM SUM TOOK: %f\n", elapsed_time(move_time, cum_sum));
 		double u1 = (1/((double)(Nparticles)))*randu(seed, 0);
 		for(x = 0; x < Nparticles; x++){
-			u[x] = u1 + x/((double)(Nparticles));
+			u_u[x] = u1 + x/((double)(Nparticles));
 		}
 		long long u_time = get_time();
 		printf("TIME TO CALC U TOOK: %f\n", elapsed_time(cum_sum, u_time));
 		long long start_copy = get_time();
 		//CUDA memory copying from CPU memory to GPU memory
-		cudaMemcpy(arrayX_GPU, arrayX, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
-		cudaMemcpy(arrayY_GPU, arrayY, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
-		cudaMemcpy(xj_GPU, xj, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
-		cudaMemcpy(yj_GPU, yj, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
-		cudaMemcpy(CDF_GPU, CDF, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
-		cudaMemcpy(u_GPU, u, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(arrayX_GPU, arrayX, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(arrayY_GPU, arrayY, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(xj_GPU, xj, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(yj_GPU, yj, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(CDF_GPU, CDF, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
+		// cudaMemcpy(u_GPU, u, sizeof(double)*Nparticles, cudaMemcpyHostToDevice);
 		long long end_copy = get_time();
 		//Set number of threads
 		int num_blocks = ceil((double) Nparticles/(double) threads_per_block);
 		
 		//KERNEL FUNCTION CALL
-		kernel <<< num_blocks, threads_per_block >>> (arrayX_GPU, arrayY_GPU, CDF_GPU, u_GPU, xj_GPU, yj_GPU, Nparticles);
-                cudaThreadSynchronize();
-                long long start_copy_back = get_time();
+		kernel <<< num_blocks, threads_per_block >>> (arrayX_u, arrayY_u, CDF_u, u_u, xj_u, yj_u, Nparticles);
+        cudaDeviceSynchronize();
+        long long start_copy_back = get_time();
 		//CUDA memory copying back from GPU to CPU memory
-		cudaMemcpy(yj, yj_GPU, sizeof(double)*Nparticles, cudaMemcpyDeviceToHost);
-		cudaMemcpy(xj, xj_GPU, sizeof(double)*Nparticles, cudaMemcpyDeviceToHost);
+		// cudaMemcpy(yj, yj_GPU, sizeof(double)*Nparticles, cudaMemcpyDeviceToHost);
+		// cudaMemcpy(xj, xj_GPU, sizeof(double)*Nparticles, cudaMemcpyDeviceToHost);
 		long long end_copy_back = get_time();
 		printf("SENDING TO GPU TOOK: %lf\n", elapsed_time(start_copy, end_copy));
 		printf("CUDA EXEC TOOK: %lf\n", elapsed_time(end_copy, start_copy_back));
@@ -583,8 +591,8 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 		
 		for(x = 0; x < Nparticles; x++){
 			//reassign arrayX and arrayY
-			arrayX[x] = xj[x];
-			arrayY[x] = yj[x];
+			arrayX_u[x] = xj_u[x];
+			arrayY_u[x] = yj_u[x];
 			weights[x] = 1/((double)(Nparticles));
 		}
 		long long reset = get_time();
@@ -592,24 +600,30 @@ void particleFilter(int * I, int IszX, int IszY, int Nfr, int * seed, int Nparti
 	}
 	
 	//CUDA freeing of memory
-	cudaFree(u_GPU);
-	cudaFree(CDF_GPU);
-	cudaFree(yj_GPU);
-	cudaFree(xj_GPU);
-	cudaFree(arrayY_GPU);
-	cudaFree(arrayX_GPU);
+	// cudaFree(u_GPU);
+	// cudaFree(CDF_GPU);
+	// cudaFree(yj_GPU);
+	// cudaFree(xj_GPU);
+	// cudaFree(arrayY_GPU);
+	// cudaFree(arrayX_GPU);
+	cudaFree(u_u);
+	cudaFree(CDF_u);
+	cudaFree(yj_u);
+	cudaFree(xj_u);
+	cudaFree(arrayY_u);
+	cudaFree(arrayX_u);
 	
 	//free memory
 	free(disk);
 	free(objxy);
 	free(weights);
 	free(likelihood);
-	free(arrayX);
-	free(arrayY);
-	free(xj);
-	free(yj);
-	free(CDF);
-	free(u);
+	// free(arrayX);
+	// free(arrayY);
+	// free(xj);
+	// free(yj);
+	// free(CDF);
+	// free(u);
 	free(ind);
 }
 int main(int argc, char * argv[]){
@@ -674,8 +688,7 @@ int main(int argc, char * argv[]){
 	}
 	//establish seed
 	int * seed = (int *)malloc(sizeof(int)*Nparticles);
-	int i;
-	for(i = 0; i < Nparticles; i++)
+	for(int i = 0; i < Nparticles; i++)
 		seed[i] = time(0)*i;
 	//malloc matrix
 	int * I = (int *)malloc(sizeof(int)*IszX*IszY*Nfr);
