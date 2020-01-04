@@ -6,12 +6,17 @@
           # .
           # .
 	# command n
+include ../../../common/make.config
 
+CC := $(CUDA_DIR)/bin/nvcc
+
+INCLUDE := $(CUDA_DIR)/include
+LIB := $(CUDA_DIR)/lib
 # link objects(binaries) together
 myocyte.out:		main.o
-	nvcc	main.o \
-				-I/usr/local/cuda/include \
-				-L/usr/local/cuda/lib \
+	$(CC)	main.o \
+				-I$(INCLUDE) \
+				-L$(LIB) \
 				-lm -lcuda -lcudart \
                                 -o myocyte.out
 
@@ -35,7 +40,7 @@ main.o:	define.c \
 				kernel_fin_2.cu \
 				file.c \
 				timer.c
-	nvcc	main.cu \
+	$(CC)	main.cu \
 				-c -O3 -g
 
 # delete all object files

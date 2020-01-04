@@ -123,7 +123,7 @@ int work(	int xmax,
 
 	// y
 	for(i=0; i<workload; i++){
-		read(	"../../data/myocyte/y.txt",
+		read(	"../../../data/myocyte/y.txt",
 					y[i][0],
 					EQUATIONS,
 					1,
@@ -132,7 +132,7 @@ int work(	int xmax,
 
 	// params
 	for(i=0; i<workload; i++){
-		read("../../data/myocyte/params.txt",
+		read("../../../data/myocyte/params.txt",
 					params[i],
 					PARAMETERS,
 					1,
