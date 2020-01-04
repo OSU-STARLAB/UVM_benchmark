@@ -1,4 +1,4 @@
-include ../../../common/make.config
+include ../../../../common/make.config
 
 all: mummergpu
 .SUFFIXES : .cu .cu_dbg_o .c_dbg_o .cpp_dbg_o .cu_rel_o .c_rel_o .cpp_rel_o .cubin
