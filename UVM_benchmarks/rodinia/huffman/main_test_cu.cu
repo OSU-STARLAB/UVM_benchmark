@@ -59,12 +59,22 @@ void runVLCTest(char *file_name, uint num_block_threads, uint num_blocks) {
     initParams(file_name, num_block_threads, num_blocks, num_elements, mem_size, symbol_type_size);
     printf("Parameters: num_elements: %d, num_blocks: %d, num_block_threads: %d\n----------------------------\n", num_elements, num_blocks, num_block_threads);
     ////////LOAD DATA ///////////////
-    uint	*sourceData =	(uint*) malloc(mem_size);
-    uint	*destData   =	(uint*) malloc(mem_size);
+
+    // uint	*sourceData =	(uint*) malloc(mem_size);
+    // uint	*destData   =	(uint*) malloc(mem_size);
     uint	*crefData   =	(uint*) malloc(mem_size);
 
-    uint	*codewords	   = (uint*) malloc(NUM_SYMBOLS*symbol_type_size);
-    uint	*codewordlens  = (uint*) malloc(NUM_SYMBOLS*symbol_type_size);
+    // uint	*codewords	   = (uint*) malloc(NUM_SYMBOLS*symbol_type_size);
+    // uint	*codewordlens  = (uint*) malloc(NUM_SYMBOLS*symbol_type_size);
+
+    uint	*d_sourceData;
+    uint	*d_destData;
+    uint	*d_codewords;
+    uint	*d_codewordlens;
+    CUDA_SAFE_CALL(cudaMallocManaged(&d_sourceData,		  mem_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_codewords,		  NUM_SYMBOLS*symbol_type_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_codewordlens,		  NUM_SYMBOLS*symbol_type_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_destData,			  mem_size));
 
     uint	*cw32 =		(uint*) malloc(mem_size);
     uint	*cw32len =	(uint*) malloc(mem_size);
@@ -72,42 +82,38 @@ void runVLCTest(char *file_name, uint num_block_threads, uint num_blocks) {
 
     uint	*cindex2=	(uint*) malloc(num_blocks*sizeof(int));
 
-    memset(sourceData,   0, mem_size);
-    memset(destData,     0, mem_size);
+    memset(d_sourceData,   0, mem_size);
+    memset(d_destData,     0, mem_size);
     memset(crefData,     0, mem_size);
     memset(cw32,         0, mem_size);
     memset(cw32len,      0, mem_size);
     memset(cw32idx,      0, mem_size);
-    memset(codewords,    0, NUM_SYMBOLS*symbol_type_size);
-    memset(codewordlens, 0, NUM_SYMBOLS*symbol_type_size);
+    memset(d_codewords,    0, NUM_SYMBOLS*symbol_type_size);
+    memset(d_codewordlens, 0, NUM_SYMBOLS*symbol_type_size);
     memset(cindex2, 0, num_blocks*sizeof(int));
     //////// LOAD DATA ///////////////
-    loadData(file_name, sourceData, codewords, codewordlens, num_elements, mem_size, H);
+    loadData(file_name, d_sourceData, d_codewords, d_codewordlens, num_elements, mem_size, H);
 
     //////// LOAD DATA ///////////////
 
-    unsigned int	*d_sourceData, *d_destData, *d_destDataPacked;
-    unsigned int	*d_codewords, *d_codewordlens;
+    unsigned int *d_destDataPacked;
     unsigned int	*d_cw32, *d_cw32len, *d_cw32idx, *d_cindex, *d_cindex2;
 
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_sourceData,		  mem_size));
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_destData,			  mem_size));
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_destDataPacked,	  mem_size));
 
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_codewords,		  NUM_SYMBOLS*symbol_type_size));
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_codewordlens,		  NUM_SYMBOLS*symbol_type_size));
 
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_cw32,				  mem_size));
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_cw32len,			  mem_size));
-    CUDA_SAFE_CALL(cudaMalloc((void**) &d_cw32idx,			  mem_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_destDataPacked,	  mem_size));
 
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_cindex,         num_blocks*sizeof(unsigned int)));
-    CUDA_SAFE_CALL(cudaMalloc((void**)&d_cindex2,        num_blocks*sizeof(unsigned int)));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_cw32,				  mem_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_cw32len,			  mem_size));
+    CUDA_SAFE_CALL(cudaMallocManaged( &d_cw32idx,			  mem_size));
 
-    CUDA_SAFE_CALL(cudaMemcpy(d_sourceData,		sourceData,		mem_size,		cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpy(d_codewords,		codewords,		NUM_SYMBOLS*symbol_type_size,	cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpy(d_codewordlens,	codewordlens,	NUM_SYMBOLS*symbol_type_size,	cudaMemcpyHostToDevice));
-    CUDA_SAFE_CALL(cudaMemcpy(d_destData,		destData,		mem_size,		cudaMemcpyHostToDevice));
+    CUDA_SAFE_CALL(cudaMallocManaged(&d_cindex,         num_blocks*sizeof(unsigned int)));
+    CUDA_SAFE_CALL(cudaMallocManaged(&d_cindex2,        num_blocks*sizeof(unsigned int)));
+
+    // CUDA_SAFE_CALL(cudaMemcpy(d_sourceData,		sourceData,		mem_size,		cudaMemcpyHostToDevice));
+    // CUDA_SAFE_CALL(cudaMemcpy(d_codewords,		codewords,		NUM_SYMBOLS*symbol_type_size,	cudaMemcpyHostToDevice));
+    // CUDA_SAFE_CALL(cudaMemcpy(d_codewordlens,	codewordlens,	NUM_SYMBOLS*symbol_type_size,	cudaMemcpyHostToDevice));
+    // CUDA_SAFE_CALL(cudaMemcpy(d_destData,		destData,		mem_size,		cudaMemcpyHostToDevice));
 
     dim3 grid_size(num_blocks,1,1);
     dim3 block_size(num_block_threads, 1, 1);
@@ -119,7 +125,7 @@ void runVLCTest(char *file_name, uint num_block_threads, uint num_blocks) {
     //////////////////* CPU ENCODER *///////////////////////////////////
     unsigned int refbytesize;
     long long timer = get_time();
-    cpu_vlc_encode((unsigned int*)sourceData, num_elements, (unsigned int*)crefData,  &refbytesize, codewords, codewordlens);
+    cpu_vlc_encode((unsigned int*)d_sourceData, num_elements, (unsigned int*)crefData,  &refbytesize, d_codewords, d_codewordlens);
     float msec = (float)((get_time() - timer)/1000.0);
     printf("CPU Encoding time (CPU): %f (ms)\n", msec);
     printf("CPU Encoded to %d [B]\n", refbytesize);
@@ -145,7 +151,7 @@ void runVLCTest(char *file_name, uint num_block_threads, uint num_blocks) {
 #endif
                     d_destData, d_cindex); //testedOK2
         }
-    cudaThreadSynchronize();
+    cudaDeviceSynchronize();
     cudaEventRecord( stop, 0 ) ;
     cudaEventSynchronize( stop ) ;
     float   elapsedTime;
@@ -165,13 +171,20 @@ void runVLCTest(char *file_name, uint num_block_threads, uint num_blocks) {
 
     pack2<<< num_scan_elements/16, 16>>>((unsigned int*)d_destData, d_cindex, d_cindex2, (unsigned int*)d_destDataPacked, num_elements/num_scan_elements);
     CUT_CHECK_ERROR("Pack2 Kernel execution failed\n");
+    cudaDeviceSynchronize();
     deallocBlockSums();
 
-    CUDA_SAFE_CALL(cudaMemcpy(destData, d_destDataPacked, mem_size, cudaMemcpyDeviceToHost));
-    compare_vectors((unsigned int*)crefData, (unsigned int*)destData, num_ints);
+    // CUDA_SAFE_CALL(cudaMemcpy(destData, d_destDataPacked, mem_size, cudaMemcpyDeviceToHost));
+    compare_vectors((unsigned int*)crefData, (unsigned int*)d_destDataPacked, num_ints);
 #endif 
 
-    free(sourceData); free(destData);  	free(codewords);  	free(codewordlens); free(cw32);  free(cw32len); free(crefData); 
+    // free(sourceData); 
+    // free(destData);  	
+    // free(codewords);  	
+    // free(codewordlens); 
+    free(cw32);  
+    free(cw32len); 
+    free(crefData); 
     CUDA_SAFE_CALL(cudaFree(d_sourceData)); 	CUDA_SAFE_CALL(cudaFree(d_destData)); CUDA_SAFE_CALL(cudaFree(d_destDataPacked));
     CUDA_SAFE_CALL(cudaFree(d_codewords)); 		CUDA_SAFE_CALL(cudaFree(d_codewordlens));
     CUDA_SAFE_CALL(cudaFree(d_cw32)); 		CUDA_SAFE_CALL(cudaFree(d_cw32len)); 	CUDA_SAFE_CALL(cudaFree(d_cw32idx)); 
