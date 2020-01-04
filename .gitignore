@@ -4,3 +4,9 @@
 gcc/
 g++/
 *.out
+density
+density_energy
+k-means/
+*.r
+*.g
+*.b
