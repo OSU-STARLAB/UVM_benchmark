@@ -7,14 +7,14 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Includes
 ////////////////////////////////////////////////////////////////////////////////
-#include <GL/glew.h>
-#include <GL/glut.h>
+// #include <GL/glew.h>
+// #include <GL/glut.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include "helper_cuda.h"
-#include <cuda_gl_interop.h>
+// #include <cuda_gl_interop.h>
 #include "bucketsort.cuh"
 // includes, kernels
 #include "bucketsort_kernel.cu"
