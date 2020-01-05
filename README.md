@@ -7,7 +7,10 @@ Create the repo of UVM benchmarks
     Modify Rodinia BFS dataset Generation program accordingly. Current generated data can be used by our BFS directly.  
     [BFS_Original](https://github.com/rafalk342/bfs-cuda)
 
+2. Add Rodinia UVM version
 
+    Several benchmarks will be modified later
+    [Rodinia Original](http://rodinia.cs.virginia.edu/doku.php)
 
 ## Machine Learning Benchmarks
 
@@ -19,4 +22,19 @@ Create the repo of UVM benchmarks
 2. Kmeans 
 
     Modify the original code. 
-    [Kmeans_Original](https://github.com/goldsborough/k-means)
+    [Kmeans_Original](https://github.com/sharath29/kmeans-cuda)
+
+3. Logistic Regression
+    
+    Modify the orginal code.
+    [Logistic Regression Original](https://github.com/YSZhuoyang/cuda-logistic-regression)
+    
+4. CNN
+    
+    Modify the original code.
+    [CNN Original](https://github.com/catchchaos/CUDA-CNN)
+
+5. KNN 
+
+    Modify the original code. 
+    [KNN_Original](https://github.com/vincentfpgarcia/kNN-CUDA)
