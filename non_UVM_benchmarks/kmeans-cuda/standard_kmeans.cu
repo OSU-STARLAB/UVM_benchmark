@@ -251,7 +251,7 @@ fclose(fp);
 
 	
   std::string str(std::to_string(h_x.size())),str1,str2;
-  str = "output/standard/" + str;
+  str = "results/standard/" + str;
 
    
   

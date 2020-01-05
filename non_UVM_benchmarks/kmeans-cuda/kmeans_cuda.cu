@@ -193,7 +193,7 @@ void read_data(float **x, float **y, float **mu_x, float **mu_y, int *n, int *k,
 
   
   *k = 0;
-  fp = fopen("input/initCoord.txt", "r");
+  fp = fopen("../../data/kmeans/initCoord.txt", "r");
   while(fgets(buf, 64, fp) != NULL){
     *k += 1;
     *mu_x = (float*) realloc(*mu_x, (*k)*sizeof(float));
@@ -212,7 +212,7 @@ void print_results(int *group, float *mu_x, float *mu_y, int n, int k,char* arg)
   FILE *fp;
   int i;
   std::string str(arg),str1,str2;
-  str = "output/cuda/" + str;
+  str = "results/cuda/" + str;
 
    str1 = str + "_group_members.txt";
   fp = fopen(str1.c_str(), "w");
