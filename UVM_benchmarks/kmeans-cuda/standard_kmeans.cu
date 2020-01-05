@@ -14,18 +14,20 @@
 double std_time_used;
 struct Data {
   Data(int size) : size(size), bytes(size * sizeof(float)) {
-    cudaMalloc(&x, bytes);
-    cudaMalloc(&y, bytes);
+    cudaMallocManaged(&x, bytes);
+    cudaMallocManaged(&y, bytes);
     cudaMemset(x, 0, bytes);
     cudaMemset(y, 0, bytes);
   }
 
   Data(int size, std::vector<float>& h_x, std::vector<float>& h_y)
   : size(size), bytes(size * sizeof(float)) {
-    cudaMalloc(&x, bytes);
-    cudaMalloc(&y, bytes);
-    cudaMemcpy(x, h_x.data(), bytes, cudaMemcpyHostToDevice);
-    cudaMemcpy(y, h_y.data(), bytes, cudaMemcpyHostToDevice);
+    cudaMallocManaged(&x, bytes);
+    cudaMallocManaged(&y, bytes);
+    // cudaMemcpy(x, h_x.data(), bytes, cudaMemcpyHostToDevice);
+    // cudaMemcpy(y, h_y.data(), bytes, cudaMemcpyHostToDevice);
+    memcpy(x, h_x.data(), bytes);
+    memcpy(y, h_y.data(), bytes);
   }
 
   ~Data() {
@@ -235,8 +237,10 @@ std_time_used = duration.count();
 
   std::vector<float> mean_x(k, 0);
   std::vector<float> mean_y(k, 0);
-  cudaMemcpy(mean_x.data(), d_means.x, d_means.bytes, cudaMemcpyDeviceToHost);
-  cudaMemcpy(mean_y.data(), d_means.y, d_means.bytes, cudaMemcpyDeviceToHost);
+  // cudaMemcpy(mean_x.data(), d_means.x, d_means.bytes, cudaMemcpyDeviceToHost);
+  // cudaMemcpy(mean_y.data(), d_means.y, d_means.bytes, cudaMemcpyDeviceToHost);
+  memcpy(mean_x.data(), d_means.x, d_means.bytes);
+  memcpy(mean_y.data(), d_means.y, d_means.bytes);
 
   for (size_t cluster = 0; cluster < k; ++cluster) {
     //std::cout << mean_x[cluster] << " " << mean_y[cluster] << std::endl;
@@ -261,11 +265,5 @@ fclose(fp);
     fprintf(fp, "%0.6f %0.6f\n", mean_x[i], mean_y[i]);
   }
   fclose(fp);
-
-
-
-
-
-
-
+  
 }
