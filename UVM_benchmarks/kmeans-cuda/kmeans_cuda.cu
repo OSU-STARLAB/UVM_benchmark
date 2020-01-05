@@ -99,7 +99,7 @@ int main(int argc,char* argv[]){
   /* cpu variables */
   int n; /* number of points */
   int k; /* number of clusters */
-  int *group;
+  // int *group;
   float *x = NULL, *y = NULL, *mu_x = NULL, *mu_y = NULL;
 
   /* gpu variables */
@@ -110,25 +110,30 @@ int main(int argc,char* argv[]){
   read_data(&x, &y, &mu_x, &mu_y, &n, &k,argv[2]);
 
   /* allocate cpu memory */
-  group = (int*) malloc(n*sizeof(int));
+  // group = (int*) malloc(n*sizeof(int));
 
   /* allocate gpu memory */
-  CUDA_CALL(cudaMalloc((void**) &group_d,n*sizeof(int)));
-  CUDA_CALL(cudaMalloc((void**) &nx_d, k*sizeof(int)));
-  CUDA_CALL(cudaMalloc((void**) &ny_d, k*sizeof(int)));
-  CUDA_CALL(cudaMalloc((void**) &x_d, n*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &y_d, n*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &mu_x_d, k*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &mu_y_d, k*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &sum_x_d, k*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &sum_y_d, k*sizeof(float)));
-  CUDA_CALL(cudaMalloc((void**) &dst_d, n*k*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&group_d,n*sizeof(int)));
+  CUDA_CALL(cudaMallocManaged(&nx_d, k*sizeof(int)));
+  CUDA_CALL(cudaMallocManaged(&ny_d, k*sizeof(int)));
+  CUDA_CALL(cudaMallocManaged(&x_d, n*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&y_d, n*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&mu_x_d, k*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&mu_y_d, k*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&sum_x_d, k*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&sum_y_d, k*sizeof(float)));
+  CUDA_CALL(cudaMallocManaged(&dst_d, n*k*sizeof(float)));
+
+  memcpy(x_d, x, n*sizeof(float));
+  memcpy(y_d, x, n*sizeof(float));
+  memcpy(mu_x_d, mu_x, k*sizeof(float));
+  memcpy(mu_y_d, mu_y, k*sizeof(float));
 
   /* write data to gpu */
-  CUDA_CALL(cudaMemcpy(x_d, x, n*sizeof(float), cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaMemcpy(y_d, y, n*sizeof(float), cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaMemcpy(mu_x_d, mu_x, k*sizeof(float), cudaMemcpyHostToDevice));
-  CUDA_CALL(cudaMemcpy(mu_y_d, mu_y, k*sizeof(float), cudaMemcpyHostToDevice));
+  // CUDA_CALL(cudaMemcpy(x_d, x, n*sizeof(float), cudaMemcpyHostToDevice));
+  // CUDA_CALL(cudaMemcpy(y_d, y, n*sizeof(float), cudaMemcpyHostToDevice));
+  // CUDA_CALL(cudaMemcpy(mu_x_d, mu_x, k*sizeof(float), cudaMemcpyHostToDevice));
+  // CUDA_CALL(cudaMemcpy(mu_y_d, mu_y, k*sizeof(float), cudaMemcpyHostToDevice));
   /* perform kmeans */
 
 
@@ -144,19 +149,19 @@ int main(int argc,char* argv[]){
 gpu_time_used = duration.count();
 
   /* read back data from gpu */
-  CUDA_CALL(cudaMemcpy(group, group_d, n*sizeof(int), cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(mu_x, mu_x_d, k*sizeof(float), cudaMemcpyDeviceToHost));
-  CUDA_CALL(cudaMemcpy(mu_y, mu_y_d, k*sizeof(float), cudaMemcpyDeviceToHost));
+  // CUDA_CALL(cudaMemcpy(group, group_d, n*sizeof(int), cudaMemcpyDeviceToHost));
+  // CUDA_CALL(cudaMemcpy(mu_x, mu_x_d, k*sizeof(float), cudaMemcpyDeviceToHost));
+  // CUDA_CALL(cudaMemcpy(mu_y, mu_y_d, k*sizeof(float), cudaMemcpyDeviceToHost));
 
   /* print results and clean up */  
-  print_results(group, mu_x, mu_y, n, k,argv[3]);
+  print_results(group_d, mu_x_d, mu_y_d, n, k,argv[3]);
 
 
   free(x);
   free(y);
   free(mu_x);
   free(mu_y);
-  free(group);
+  // free(group);
 
   CUDA_CALL(cudaFree(x_d));
   CUDA_CALL(cudaFree(y_d));
