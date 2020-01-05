@@ -28,3 +28,8 @@ Create the repo of UVM benchmarks
     
     Modify the orginal code.
     [Logistic Regression Original](https://github.com/YSZhuoyang/cuda-logistic-regression)
+    
+4. CNN
+    
+    Modify the original code.
+    [CNN Original](https://github.com/catchchaos/CUDA-CNN)
