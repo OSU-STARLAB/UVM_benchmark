@@ -22,7 +22,7 @@ Create the repo of UVM benchmarks
 2. Kmeans 
 
     Modify the original code. 
-    [Kmeans_Original](https://github.com/goldsborough/k-means)
+    [Kmeans_Original](https://github.com/sharath29/kmeans-cuda)
 
 3. Logistic Regression
     
