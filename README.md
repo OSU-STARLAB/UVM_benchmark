@@ -33,3 +33,8 @@ Create the repo of UVM benchmarks
     
     Modify the original code.
     [CNN Original](https://github.com/catchchaos/CUDA-CNN)
+
+5. KNN 
+
+    Modify the original code. 
+    [KNN_Original](https://github.com/vincentfpgarcia/kNN-CUDA)
