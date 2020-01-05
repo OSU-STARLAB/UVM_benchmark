@@ -184,10 +184,12 @@ static unsigned int classify(double data[28][28])
 
 	unsigned int max = 0;
 
-	cudaMemcpy(res, l_f.output, sizeof(float) * 10, cudaMemcpyDeviceToHost);
+	// cudaMemcpy(res, l_f.output, sizeof(float) * 10, cudaMemcpyDeviceToHost);
+	memcpy(res, l_f.output, sizeof(float) * 10);
 
 	for (int i = 1; i < 10; ++i) {
 		if (res[max] < res[i]) {
+		// if(l_f.output[max] < l_f.output[i]) {
 			max = i;
 		}
 	}

@@ -7,7 +7,7 @@ Layer::Layer(int M, int N, int O)
 	this->N = N;
 	this->O = O;
 
-	float h_bias[N];
+	// float h_bias[N];
 	float h_weight[N][M];
 
 	output = NULL;
@@ -15,8 +15,20 @@ Layer::Layer(int M, int N, int O)
 	bias   = NULL;
 	weight = NULL;
 
+	cudaMallocManaged(&output, sizeof(float) * O);
+	cudaMallocManaged(&preact, sizeof(float) * O);
+
+	cudaMallocManaged(&bias, sizeof(float) * N);
+
+	cudaMallocManaged(&weight, sizeof(float) * M * N);
+
+	cudaMallocManaged(&d_output, sizeof(float) * O);
+	cudaMallocManaged(&d_preact, sizeof(float) * O);
+	cudaMallocManaged(&d_weight, sizeof(float) * M * N);
+
 	for (int i = 0; i < N; ++i) {
-		h_bias[i] = 0.5f - float(rand()) / float(RAND_MAX);
+		// h_bias[i] = 0.5f - float(rand()) / float(RAND_MAX);
+		bias[i] = 0.5f - float(rand()) / float(RAND_MAX);
 		/*h_bias[i] = 0.0f;*/
 
 		for (int j = 0; j < M; ++j) {
@@ -24,21 +36,10 @@ Layer::Layer(int M, int N, int O)
 			/*h_weight[i][j] = 0.05f;*/
 		}
 	}
+	// cudaMemcpy(bias, h_bias, sizeof(float) * N, cudaMemcpyHostToDevice);
 
-	cudaMalloc(&output, sizeof(float) * O);
-	cudaMalloc(&preact, sizeof(float) * O);
-
-	cudaMalloc(&bias, sizeof(float) * N);
-
-	cudaMalloc(&weight, sizeof(float) * M * N);
-
-	cudaMalloc(&d_output, sizeof(float) * O);
-	cudaMalloc(&d_preact, sizeof(float) * O);
-	cudaMalloc(&d_weight, sizeof(float) * M * N);
-
-	cudaMemcpy(bias, h_bias, sizeof(float) * N, cudaMemcpyHostToDevice);
-
-	cudaMemcpy(weight, h_weight, sizeof(float) * M * N, cudaMemcpyHostToDevice);
+	// cudaMemcpy(weight, h_weight, sizeof(float) * M * N, cudaMemcpyHostToDevice);
+	memcpy(weight, h_weight, sizeof(float) * M * N);
 }
 
 // Destructor
@@ -59,7 +60,8 @@ Layer::~Layer()
 // Send data one row from dataset to the GPU
 void Layer::setOutput(float *data)
 {
-	cudaMemcpy(output, data, sizeof(float) * O, cudaMemcpyHostToDevice);
+	// cudaMemcpy(output, data, sizeof(float) * O, cudaMemcpyHostToDevice);
+	memcpy(output, data, sizeof(float) * O);
 }
 
 // Reset GPU memory between iterations

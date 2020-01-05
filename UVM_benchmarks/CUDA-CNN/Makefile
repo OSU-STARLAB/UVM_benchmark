@@ -1,5 +1,9 @@
+include ../../common/make.config
+
+CC := $(CUDA_DIR)/bin/nvcc
+
 all:
-	nvcc -lcuda -lcublas *.cu -o CNN  -arch=compute_70 -Wno-deprecated-gpu-targets
+	$(CC) -lcuda -lcublas *.cu -o CNN
 
 run:
 	./CNN
