@@ -1,0 +1,5 @@
+To compile, install CUDA >= 9.0 on a Linux machine with NVIDIA GPU of computing capability >= 6.0.
+
+Open terminal and `nvcc -std=c++11 -arch=sm_61 -rdc=true svm.cu kernelmatrix.cu readdata.cu suboptimisation.cu -o run_svm_with`.
+
+Remember to put the binary next to MNIST data.
