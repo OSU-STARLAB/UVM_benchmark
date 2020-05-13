@@ -40,7 +40,7 @@ Create the repo of UVM benchmarks
     [KNN_Original](https://github.com/vincentfpgarcia/kNN-CUDA)
 
 
-5. SVM 
+6. SVM 
 
     Modify the original code. 
     [SVM_Original](https://github.com/qin-yu/julia-svm-gpu-cuda)    
