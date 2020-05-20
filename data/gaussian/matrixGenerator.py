@@ -55,7 +55,7 @@ for sqSize in range(a,b,c):
 	#size = 100
 	#size = sqSize*sqSize
 	size = sqSize;
-	print size
+	print (size)
 	solnVec = []
 	matrix = []
 	bVector = []

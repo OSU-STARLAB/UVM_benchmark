@@ -13,7 +13,7 @@ Layer::Layer(int M, int N, int O) {
   preact = NULL;
   bias = NULL;
   weight = NULL;
-
+  cudaStreamCreate(&stream);
   cudaMallocManaged(&output, sizeof(float) * O);
   cudaMallocManaged(&preact, sizeof(float) * O);
 
@@ -45,13 +45,11 @@ Layer::Layer(int M, int N, int O) {
 
 // Destructor
 Layer::~Layer() {
+  cudaStreamDestroy(stream);
   cudaFree(output);
   cudaFree(preact);
-
   cudaFree(bias);
-
   cudaFree(weight);
-
   cudaFree(d_output);
   cudaFree(d_preact);
   cudaFree(d_weight);
@@ -60,7 +58,9 @@ Layer::~Layer() {
 // Send data one row from dataset to the GPU
 void Layer::setOutput(float *data) {
   // cudaMemcpy(output, data, sizeof(float) * O, cudaMemcpyHostToDevice);
-  memcpy(output, data, sizeof(float) * O);
+  memcpy(output, data, sizeof(float) * O); //TODO May change to prefetch
+  cudaMemPrefetchAsync(output,sizeof(float) * O,  0, stream );
+
 }
 
 // Reset GPU memory between iterations

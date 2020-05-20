@@ -7,17 +7,17 @@ from metric_list import metrics
 # files = ["", "", "", "","", "","", "","", "","", "","", "","", ""]
 folders = ["BN"]
 files = ["./ordergraph"]
-UVM_flag = True
-print_options = " --print-gpu-trace "
-enable_metric = " --metrics "
+UVM_flag = False
+print_options = " --csv --log-file test.csv  --track-memory-allocations off"
 
-base_path = "UVM_benchmarks/"
-if not UVM_flag:
-    base_path = "non_UVM_benchmarks/"
 
-for i, folder in enumerate(folders):
-    path = base_path + folder + "/"
-    command = "cd " + path + "; nvprof " + print_options + \
-        enable_metric + metrics[11] + " " + files[i]
-    print(command)
-    os.system(command)
+for UVM_flag in [True, False]:
+    base_path = "UVM_benchmarks/"
+    if not UVM_flag:
+        base_path = "non_UVM_benchmarks/"
+
+    for i, folder in enumerate(folders):
+        path = base_path + folder + "/"
+        command = "cd " + path + "; nvprof " + print_options + metrics[9]  + metrics[75] + " " + files[i]
+        print(command)
+        os.system(command)

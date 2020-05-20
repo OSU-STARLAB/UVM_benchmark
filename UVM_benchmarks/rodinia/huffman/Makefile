@@ -1,7 +1,7 @@
 NVCC=nvcc
 CC = g++
 
-CUDA_INCLUDEPATH=/usr/local/cuda-9.0/include
+CUDA_INCLUDEPATH=/usr/local/cuda-10.2/include
 
 NVCC_OPTS=-O3  -Xcompiler -m64 -g -G
 

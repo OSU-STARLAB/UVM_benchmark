@@ -1,5 +1,5 @@
 NVCCCFLAGS =  -std=c++11 -lcuda -O0
-NVCC = /usr/local/cuda-10.1/bin/nvcc
+NVCC = /usr/local/cuda-10.2/bin/nvcc
 
 knn: knn_cuda.cu 
 	$(NVCC) ${NVCCCFLAGS} -o $@ $<

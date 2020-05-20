@@ -1,9 +1,9 @@
-CUDA_INSTALL_PATH ?= /usr/local/cuda
+CUDA_INSTALL_PATH ?= /usr/local/cuda-10.2/
 GCC_VER = -5
 
-CXX := /usr/bin/g++$(GCC_VER)
-CC := /usr/bin/gcc$(GCC_VER)
-CCPATH := ./gcc
+CXX := /usr/bin/g++
+CC := /usr/bin/gcc
+CCPATH := gcc
 
 NVCC  := $(CUDA_INSTALL_PATH)bin/nvcc -ccbin $(CCPATH)
 LINK := $(NVCC)

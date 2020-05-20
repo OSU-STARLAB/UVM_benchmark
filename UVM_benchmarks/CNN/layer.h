@@ -24,6 +24,7 @@ class Layer {
 	float *d_output;
 	float *d_preact;
 	float *d_weight;
+	cudaStream_t stream;
 
 	Layer(int M, int N, int O);
 

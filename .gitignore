@@ -10,3 +10,7 @@ k-means/
 *.r
 *.g
 *.b
+*.csv
+results/
+*.ii
+*.pyc

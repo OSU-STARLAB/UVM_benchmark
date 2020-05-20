@@ -1,177 +1,177 @@
 metrics = [
-    'achieved_occupancy'	,  # 0
-    'atomic_transactions'	,  # 1
-    'atomic_transactions_per_request'	,  # 2
-    'branch_efficiency'	,  # 3
-    'cf_executed'	,  # 4
-    'cf_fu_utilization'	,  # 5
-    'cf_issued'	,  # 6
-    'double_precision_fu_utilization'	,  # 7
-    'dram_read_bytes'	,  # 8
-    'dram_read_throughput'	,  # 9
-    'dram_read_transactions'	,  # 10
-    'dram_utilization'	,  # 11
-    'dram_write_bytes'	,  # 12
-    'dram_write_throughput'	,  # 13
-    'dram_write_transactions'	,  # 14
-    'eligible_warps_per_cycle'	,  # 15
-    'flop_count_dp'	,  # 16
-    'flop_count_dp_add'	,  # 17
-    'flop_count_dp_fma'	,  # 18
-    'flop_count_dp_mul'	,  # 19
-    'flop_count_hp'	,  # 20
-    'flop_count_hp_add'	,  # 21
-    'flop_count_hp_fma'	,  # 22
-    'flop_count_hp_mul'	,  # 23
-    'flop_count_sp'	,  # 24
-    'flop_count_sp_add'	,  # 25
-    'flop_count_sp_fma'	,  # 26
-    'flop_count_sp_mul'	,  # 27
-    'flop_count_sp_special'	,  # 28
-    'flop_dp_efficiency'	,  # 29
-    'flop_hp_efficiency'	,  # 30
-    'flop_sp_efficiency'	,  # 31
-    'gld_efficiency'	,  # 32
-    'gld_requested_throughput'	,  # 33
-    'gld_throughput'	,  # 34
-    'gld_transactions'	,  # 35
-    'gld_transactions_per_request'	,  # 36
-    'global_atomic_requests'	,  # 37
-    'global_hit_rate'	,  # 38
-    'global_load_requests'	,  # 39
-    'global_reduction_requests'	,  # 40
-    'global_store_requests'	,  # 41
-    'gst_efficiency'	,  # 42
-    'gst_requested_throughput'	,  # 43
-    'gst_throughput'	,  # 44
-    'gst_transactions'	,  # 45
-    'gst_transactions_per_request'	,  # 46
-    'half_precision_fu_utilization'	,  # 47
-    'inst_bit_convert'	,  # 48
-    'inst_compute_ld_st'	,  # 49
-    'inst_control'	,  # 50
-    'inst_executed'	,  # 51
-    'inst_executed_global_atomics'	,  # 52
-    'inst_executed_global_loads'	,  # 53
-    'inst_executed_global_reductions'	,  # 54
-    'inst_executed_global_stores'	,  # 55
-    'inst_executed_local_loads'	,  # 56
-    'inst_executed_local_stores'	,  # 57
-    'inst_executed_shared_atomics'	,  # 58
-    'inst_executed_shared_loads'	,  # 59
-    'inst_executed_shared_stores'	,  # 60
-    'inst_executed_surface_atomics'	,  # 61
-    'inst_executed_surface_loads'	,  # 62
-    'inst_executed_surface_reductions'	,  # 63
-    'inst_executed_surface_stores'	,  # 64
-    'inst_executed_tex_ops'	,  # 65
-    'inst_fp_16'	,  # 66
-    'inst_fp_32'	,  # 67
-    'inst_fp_64'	,  # 68
-    'inst_integer'	,  # 69
-    'inst_inter_thread_communication'	,  # 70
-    'inst_issued'	,  # 71
-    'inst_misc'	,  # 72
-    'inst_per_warp'	,  # 73
-    'inst_replay_overhead'	,  # 74
-    'ipc'	,  # 75
-    'issue_slot_utilization'	,  # 76
-    'issue_slots'	,  # 77
-    'issued_ipc'	,  # 78
-    'l2_atomic_throughput'	,  # 79
-    'l2_atomic_transactions'	,  # 80
-    'l2_global_atomic_store_bytes'	,  # 81
-    'l2_global_load_bytes'	,  # 82
-    'l2_local_global_store_bytes'	,  # 83
-    'l2_local_load_bytes'	,  # 84
-    'l2_read_throughput'	,  # 85
-    'l2_read_transactions'	,  # 86
-    'l2_surface_load_bytes'	,  # 87
-    'l2_surface_store_bytes'	,  # 88
-    'l2_tex_hit_rate'	,  # 89
-    'l2_tex_read_hit_rate'	,  # 90
-    'l2_tex_read_throughput'	,  # 91
-    'l2_tex_read_transactions'	,  # 92
-    'l2_tex_write_hit_rate'	,  # 93
-    'l2_tex_write_throughput'	,  # 94
-    'l2_tex_write_transactions'	,  # 95
-    'l2_utilization'	,  # 96
-    'l2_write_throughput'	,  # 97
-    'l2_write_transactions'	,  # 98
-    'ldst_executed'	,  # 99
-    'ldst_fu_utilization'	,  # 100
-    'ldst_issued'	,  # 101
-    'local_hit_rate'	,  # 102
-    'local_load_requests'	,  # 103
-    'local_load_throughput'	,  # 104
-    'local_load_transactions'	,  # 105
-    'local_load_transactions_per_request'	,  # 106
-    'local_memory_overhead'	,  # 107
-    'local_store_requests'	,  # 108
-    'local_store_throughput'	,  # 109
-    'local_store_transactions'	,  # 110
-    'local_store_transactions_per_request'	,  # 111
-    'nvlink_overhead_data_received'	,  # 112
-    'nvlink_overhead_data_transmitted'	,  # 113
-    'nvlink_receive_throughput'	,  # 114
-    'nvlink_total_data_received'	,  # 115
-    'nvlink_total_data_transmitted'	,  # 116
-    'nvlink_total_nratom_data_transmitted'	,  # 117
-    'nvlink_total_ratom_data_transmitted'	,  # 118
-    'nvlink_total_response_data_received'	,  # 119
-    'nvlink_total_write_data_transmitted'	,  # 120
-    'nvlink_transmit_throughput'	,  # 121
-    'nvlink_user_data_received'	,  # 122
-    'nvlink_user_data_transmitted'	,  # 123
-    'nvlink_user_nratom_data_transmitted'	,  # 124
-    'nvlink_user_ratom_data_transmitted'	,  # 125
-    'nvlink_user_response_data_received'	,  # 126
-    'nvlink_user_write_data_transmitted'	,  # 127
-    'pcie_total_data_received'	,  # 128
-    'pcie_total_data_transmitted'	,  # 129
-    'shared_efficiency'	,  # 130
-    'shared_load_throughput'	,  # 131
-    'shared_load_transactions'	,  # 132
-    'shared_load_transactions_per_request'	,  # 133
-    'shared_store_throughput'	,  # 134
-    'shared_store_transactions'	,  # 135
-    'shared_store_transactions_per_request'	,  # 136
-    'shared_utilization'	,  # 137
-    'single_precision_fu_utilization'	,  # 138
-    'sm_efficiency'	,  # 139
-    'special_fu_utilization'	,  # 140
-    'stall_constant_memory_dependency'	,  # 141
-    'stall_exec_dependency'	,  # 142
-    'stall_inst_fetch'	,  # 143
-    'stall_memory_dependency'	,  # 144
-    'stall_memory_throttle'	,  # 145
-    'stall_not_selected'	,  # 146
-    'stall_other'	,  # 147
-    'stall_pipe_busy'	,  # 148
-    'stall_sleeping'	,  # 149
-    'stall_sync'	,  # 150
-    'stall_texture'	,  # 151
-    'surface_atomic_requests'	,  # 152
-    'surface_load_requests'	,  # 153
-    'surface_reduction_requests'	,  # 154
-    'surface_store_requests'	,  # 155
-    'sysmem_read_bytes'	,  # 156
-    'sysmem_read_throughput'	,  # 157
-    'sysmem_read_transactions'	,  # 158
-    'sysmem_read_utilization'	,  # 159
-    'sysmem_utilization'	,  # 160
-    'sysmem_write_bytes'	,  # 161
-    'sysmem_write_throughput'	,  # 162
-    'sysmem_write_transactions'	,  # 163
-    'sysmem_write_utilization'	,  # 164
-    'tensor_precision_fu_utilization'	,  # 165
-    'tensor_int_fu_utilization'	,  # 166
-    'tex_cache_hit_rate'	,  # 167
-    'tex_cache_throughput'	,  # 168
-    'tex_cache_transactions'	,  # 169
-    'tex_fu_utilization'	,  # 170
-    'tex_utilization'	,  # 171
-    'texture_load_requests'	,  # 172
-    'warp_execution_efficiency'	,  # 173
-    'warp_nonpred_execution_efficiency'	,  # 174
+     ' --metric achieved_occupancy ',  # 0
+     ' --metric atomic_transactions ',  # 1
+     ' --metric atomic_transactions_per_request ',  # 2
+     ' --metric branch_efficiency ',  # 3
+     ' --metric cf_executed   ',  # 4
+     ' --metric cf_fu_utilization ',  # 5
+     ' --metric cf_issued   ',  # 6
+     ' --metric double_precision_fu_utilization ',  # 7
+     ' --metric dram_read_bytes ',  # 8
+     ' --metric dram_read_throughput ',  # 9
+     ' --metric dram_read_transactions ',  # 10
+     ' --metric dram_utilization ',  # 11
+     ' --metric dram_write_bytes ',  # 12
+     ' --metric dram_write_throughput ',  # 13
+     ' --metric dram_write_transactions ',  # 14
+     ' --metric eligible_warps_per_cycle ',  # 15
+     ' --metric flop_count_dp ',  # 16
+     ' --metric flop_count_dp_add   ',  # 17
+     ' --metric flop_count_dp_fma  ',  # 18
+     ' --metric flop_count_dp_mul ',  # 19
+     ' --metric flop_count_hp ',  # 20
+     ' --metric flop_count_hp_add   ',  # 21
+     ' --metric flop_count_hp_fma  ',  # 22
+     ' --metric flop_count_hp_mul ',  # 23
+     ' --metric flop_count_sp ',  # 24
+     ' --metric flop_count_sp_add   ',  # 25
+     ' --metric flop_count_sp_fma  ',  # 26
+     ' --metric flop_count_sp_mul ',  # 27
+     ' --metric flop_count_sp_special ',  # 28
+     ' --metric flop_dp_efficiency ',  # 29
+     ' --metric flop_hp_efficiency ',  # 30
+     ' --metric flop_sp_efficiency ',  # 31
+     ' --metric gld_efficiency ',  # 32
+     ' --metric gld_requested_throughput ',  # 33
+     ' --metric gld_throughput ',  # 34
+     ' --metric gld_transactions ',  # 35
+     ' --metric gld_transactions_per_request ',  # 36
+     ' --metric global_atomic_requests ',  # 37
+     ' --metric global_hit_rate ',  # 38
+     ' --metric global_load_requests ',  # 39
+     ' --metric global_reduction_requests ',  # 40
+     ' --metric global_store_requests ',  # 41
+     ' --metric gst_efficiency ',  # 42
+     ' --metric gst_requested_throughput ',  # 43
+     ' --metric gst_throughput ',  # 44
+     ' --metric gst_transactions ',  # 45
+     ' --metric gst_transactions_per_request ',  # 46
+     ' --metric half_precision_fu_utilization ',  # 47
+     ' --metric inst_bit_convert ',  # 48
+     ' --metric inst_compute_ld_st ',  # 49
+     ' --metric inst_control ',  # 50
+     ' --metric inst_executed   ',  # 51
+     ' --metric inst_executed_global_atomics ',  # 52
+     ' --metric inst_executed_global_loads ',  # 53
+     ' --metric inst_executed_global_reductions ',  # 54
+     ' --metric inst_executed_global_stores ',  # 55
+     ' --metric inst_executed_local_loads ',  # 56
+     ' --metric inst_executed_local_stores ',  # 57
+     ' --metric inst_executed_shared_atomics ',  # 58
+     ' --metric inst_executed_shared_loads ',  # 59
+     ' --metric inst_executed_shared_stores ',  # 60
+     ' --metric inst_executed_surface_atomics ',  # 61
+     ' --metric inst_executed_surface_loads ',  # 62
+     ' --metric inst_executed_surface_reductions ',  # 63
+     ' --metric inst_executed_surface_stores ',  # 64
+     ' --metric inst_executed_tex_ops ',  # 65
+     ' --metric inst_fp_16 ',  # 66
+     ' --metric inst_fp_32 ',  # 67
+     ' --metric inst_fp_64 ',  # 68
+     ' --metric inst_integer ',  # 69
+     ' --metric inst_inter_thread_communication ',  # 70
+     ' --metric inst_issued   ',  # 71
+     ' --metric inst_misc   ',  # 72
+     ' --metric inst_per_warp ',  # 73
+     ' --metric inst_replay_overhead   ',  # 74
+     ' --metric ipc   ',  # 75
+     ' --metric issue_slot_utilization ',  # 76
+     ' --metric issue_slots ',  # 77
+     ' --metric issued_ipc   ',  # 78
+     ' --metric l2_atomic_throughput ',  # 79
+     ' --metric l2_atomic_transactions ',  # 80
+     ' --metric l2_global_atomic_store_bytes ',  # 81
+     ' --metric l2_global_load_bytes ',  # 82
+     ' --metric l2_local_global_store_bytes ',  # 83
+     ' --metric l2_local_load_bytes ',  # 84
+     ' --metric l2_read_throughput ',  # 85
+     ' --metric l2_read_transactions ',  # 86
+     ' --metric l2_surface_load_bytes ',  # 87
+     ' --metric l2_surface_store_bytes ',  # 88
+     ' --metric l2_tex_hit_rate ',  # 89
+     ' --metric l2_tex_read_hit_rate ',  # 90
+     ' --metric l2_tex_read_throughput ',  # 91
+     ' --metric l2_tex_read_transactions ',  # 92
+     ' --metric l2_tex_write_hit_rate ',  # 93
+     ' --metric l2_tex_write_throughput ',  # 94
+     ' --metric l2_tex_write_transactions ',  # 95
+     ' --metric l2_utilization ',  # 96
+     ' --metric l2_write_throughput ',  # 97
+     ' --metric l2_write_transactions ',  # 98
+     ' --metric ldst_executed   ',  # 99
+     ' --metric ldst_fu_utilization ',  # 100
+     ' --metric ldst_issued   ',  # 101
+     ' --metric local_hit_rate ',  # 102
+     ' --metric local_load_requests ',  # 103
+     ' --metric local_load_throughput ',  # 104
+     ' --metric local_load_transactions ',  # 105
+     ' --metric local_load_transactions_per_request ',  # 106
+     ' --metric local_memory_overhead   ',  # 107
+     ' --metric local_store_requests ',  # 108
+     ' --metric local_store_throughput ',  # 109
+     ' --metric local_store_transactions ',  # 110
+     ' --metric local_store_transactions_per_request ',  # 111
+     ' --metric nvlink_overhead_data_received   ',  # 112
+     ' --metric nvlink_overhead_data_transmitted   ',  # 113
+     ' --metric nvlink_receive_throughput ',  # 114
+     ' --metric nvlink_total_data_received   ',  # 115
+     ' --metric nvlink_total_data_transmitted   ',  # 116
+     ' --metric nvlink_total_nratom_data_transmitted   ',  # 117
+     ' --metric nvlink_total_ratom_data_transmitted   ',  # 118
+     ' --metric nvlink_total_response_data_received   ',  # 119
+     ' --metric nvlink_total_write_data_transmitted   ',  # 120
+     ' --metric nvlink_transmit_throughput ',  # 121
+     ' --metric nvlink_user_data_received   ',  # 122
+     ' --metric nvlink_user_data_transmitted   ',  # 123
+     ' --metric nvlink_user_nratom_data_transmitted   ',  # 124
+     ' --metric nvlink_user_ratom_data_transmitted   ',  # 125
+     ' --metric nvlink_user_response_data_received   ',  # 126
+     ' --metric nvlink_user_write_data_transmitted   ',  # 127
+     ' --metric pcie_total_data_received   ',  # 128
+     ' --metric pcie_total_data_transmitted   ',  # 129
+     ' --metric shared_efficiency ',  # 130
+     ' --metric shared_load_throughput ',  # 131
+     ' --metric shared_load_transactions ',  # 132
+     ' --metric shared_load_transactions_per_request ',  # 133
+     ' --metric shared_store_throughput ',  # 134
+     ' --metric shared_store_transactions ',  # 135
+     ' --metric shared_store_transactions_per_request ',  # 136
+     ' --metric shared_utilization ',  # 137
+     ' --metric single_precision_fu_utilization ',  # 138
+     ' --metric sm_efficiency ',  # 139
+     ' --metric special_fu_utilization ',  # 140
+     ' --metric stall_constant_memory_dependency ',  # 141
+     ' --metric stall_exec_dependency ',  # 142
+     ' --metric stall_inst_fetch ',  # 143
+     ' --metric stall_memory_dependency ',  # 144
+     ' --metric stall_memory_throttle ',  # 145
+     ' --metric stall_not_selected   ',  # 146
+     ' --metric stall_other ',  # 147
+     ' --metric stall_pipe_busy ',  # 148
+     ' --metric stall_sleeping ',  # 149
+     ' --metric stall_sync   ',  # 150
+     ' --metric stall_texture ',  # 151
+     ' --metric surface_atomic_requests ',  # 152
+     ' --metric surface_load_requests ',  # 153
+     ' --metric surface_reduction_requests ',  # 154
+     ' --metric surface_store_requests ',  # 155
+     ' --metric sysmem_read_bytes ',  # 156
+     ' --metric sysmem_read_throughput ',  # 157
+     ' --metric sysmem_read_transactions ',  # 158
+     ' --metric sysmem_read_utilization ',  # 159
+     ' --metric sysmem_utilization ',  # 160
+     ' --metric sysmem_write_bytes ',  # 161
+     ' --metric sysmem_write_throughput ',  # 162
+     ' --metric sysmem_write_transactions ',  # 163
+     ' --metric sysmem_write_utilization ',  # 164
+     ' --metric tensor_precision_fu_utilization ',  # 165
+     ' --metric tensor_int_fu_utilization ',  # 166
+     ' --metric tex_cache_hit_rate ',  # 167
+     ' --metric tex_cache_throughput ',  # 168
+     ' --metric tex_cache_transactions ',  # 169
+     ' --metric tex_fu_utilization ',  # 170
+     ' --metric tex_utilization ',  # 171
+     ' --metric texture_load_requests ',  # 172
+     ' --metric warp_execution_efficiency ',  # 173
+     ' --metric warp_nonpred_execution_efficiency ',  # 174
 ]

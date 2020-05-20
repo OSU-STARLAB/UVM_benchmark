@@ -162,6 +162,7 @@ int main() {
   } // endwhile
 
   // cudaFreeHost(localscore);
+  cudaFree(U_data);
   cudaFree(U_localscore);
   cudaFree(U_parent);
 
@@ -355,7 +356,7 @@ void genScore() {
 
   // cudaFreeHost(LG);
   cudaFree(U_LG);
-  cudaFree(U_data);
+  // cudaFree(U_data);
 
   cudaMallocManaged(&U_scores,
                     (sizepernode / (256 * taskperthr) + 1) * sizeof(float));
