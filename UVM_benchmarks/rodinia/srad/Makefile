@@ -1,19 +1,24 @@
+include ../../../../common/make.config
 
-all: SRAD_V1 SRAD_V2
+CC := $(CUDA_DIR)/bin/nvcc
 
-SRAD_V1:
-	cd srad_v1; 	make
+INCLUDE := $(CUDA_DIR)/include
 
-SRAD_V2:
-	cd srad_v2; 	make
+SRC = srad.cu
 
-clean: SRAD_V1_clean SRAD_V2_clean
+EXE = srad
 
-SRAD_V1_clean:
-	cd srad_v1; 	make clean
-	
-SRAD_V2_clean:
-	cd srad_v2; 	make clean
+release: $(SRC)
+	$(CC) $(KERNEL_DIM) $(SRC) -o $(EXE) -I$(INCLUDE) -L$(CUDA_LIB_DIR) 
 
+enum: $(SRC)
+	$(CC) $(KERNEL_DIM) -deviceemu $(SRC) -o $(EXE) -I$(INCLUDE) -L$(CUDA_LIB_DIR) 
 
+debug: $(SRC)
+	$(CC) $(KERNEL_DIM) -g $(SRC) -o $(EXE) -I$(INCLUDE) -L$(CUDA_LIB_DIR) 
 
+debugenum: $(SRC)
+	$(CC) $(KERNEL_DIM) -g -deviceemu $(SRC) -o $(EXE) -I$(INCLUDE) -L$(CUDA_LIB_DIR) 
+
+clean: $(SRC)
+	rm -f $(EXE) $(EXE).linkinfo result.txt
