@@ -1,0 +1,2 @@
+./gaussian -f ../../../data/gaussian/matrix256.txt
+# ./gaussian -s 16

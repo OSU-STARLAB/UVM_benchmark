@@ -57,3 +57,7 @@ UVM_benchmarks/rodinia/srad/srad
 UVM_benchmarks/rodinia/streamcluster/sc_gpu
 non_UVM_benchmarks/BN/ordergraph
 non_UVM_benchmarks/bfs/main
+non_UVM_benchmarks/rodinia/cfd/euler3d_double
+non_UVM_benchmarks/rodinia/cfd/euler3d
+non_UVM_benchmarks/rodinia/cfd/pre_euler3d_double
+non_UVM_benchmarks/rodinia/cfd/pre_euler3d

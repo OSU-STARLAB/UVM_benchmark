@@ -4,9 +4,9 @@ CC := $(CUDA_DIR)/bin/nvcc
 
 INCLUDE := $(CUDA_DIR)/include
 
-SRC = srad.cu
+SRC = hotspot.cu
 
-EXE = srad
+EXE = hotspot
 
 release: $(SRC)
 	$(CC) $(KERNEL_DIM) $(SRC) -o $(EXE) -I$(INCLUDE) -L$(CUDA_LIB_DIR) 
