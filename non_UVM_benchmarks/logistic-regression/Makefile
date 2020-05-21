@@ -12,7 +12,7 @@ OBJECTS = Helper.o ArffImporter.o
 
 # Enable Nvidia gpu
 NVCC = nvcc
-NVCCCFLAGS = -arch=sm_50 -std=c++11 -use_fast_math -lcublas# -lcublas_device -rdc=true -lcudadevrt
+NVCCCFLAGS = -arch=sm_60 -std=c++11 -use_fast_math -lcublas# -lcublas_device -rdc=true -lcudadevrt
 
 ################################ Compile ################################
 
@@ -26,7 +26,7 @@ NVCCCFLAGS = -arch=sm_50 -std=c++11 -use_fast_math -lcublas# -lcublas_device -rd
 #	$(CC) ${CFLAGS} -c ArffImporter.cpp
 
 exec: ${OBJECTS} LogisticRegression_Serial.c
- 	$(CC) ${CFLAGS} -o $@ ${OBJECTS} LogisticRegression_Serial.c
+	$(CC) ${CFLAGS} -o $@ ${OBJECTS} LogisticRegression_Serial.c
 
 Helper.o: Helper.c Helper.h BasicDataStructures.h
 	$(CC) ${CFLAGS} -c Helper.c
