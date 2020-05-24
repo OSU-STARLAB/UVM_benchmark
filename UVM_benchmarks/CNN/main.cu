@@ -40,7 +40,7 @@ int main(int argc, const char **argv) {
   }
 
   loaddata();
-  learn();
+  // learn();
   test();
 
   return 0;
@@ -148,7 +148,7 @@ static void learn() {
   cublasCreate(&blas);
 
   float err;
-  int iter = 50;
+  int iter = 1;
 
   double time_taken = 0.0;
 
@@ -211,7 +211,7 @@ static unsigned int classify(double data[28][28]) {
 static void test() {
   fprintf(stdout, "Testing!\n");
   int error = 0;
-
+  test_cnt = 1;
   for (int i = 0; i < test_cnt; ++i) {
     if (classify(test_set[i].data) != test_set[i].label) {
       ++error;
