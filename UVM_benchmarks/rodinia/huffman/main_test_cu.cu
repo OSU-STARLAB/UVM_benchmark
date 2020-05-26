@@ -17,7 +17,7 @@
 #include "print_helpers.h"
 #include "comparison_helpers.h"
 #include "stats_logger.h"
-#include "load_data.h"
+#include "load_data.cuh"
 #include <sys/time.h>
 //#include "vlc_kernel_gm32.cu"
 //#include "vlc_kernel_sm32.cu"

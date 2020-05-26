@@ -1,5 +1,5 @@
-#ifndef _LOADTESTDATA_H_
-#define _LOADTESTDATA_H_
+#ifndef _LOADTESTDATA_CUH_
+#define _LOADTESTDATA_CUH_
 
 //#include "testdatagen.h"
 #include "hist.cu"
@@ -29,7 +29,10 @@ inline void loadData(char *file_name, uint *sourceData, uint *codewords, uint *c
     }
     else 
       {
-        unsigned int freqs[UniqueSymbols] = {0};
+        // unsigned int freqs[UniqueSymbols] = {0};
+        unsigned int *freqs;
+        cudaMallocManaged(&freqs, UniqueSymbols);
+
         runHisto(file_name,freqs,mem_size,sourceData);
         INode* root = BuildTree(freqs);
 

@@ -132,9 +132,9 @@ int main() {
   cudaErrorCheck(cudaDeviceSynchronize());
 
   cublasErrorCheck(cublasDestroy(cublasHandle));
-  cudaErrorCheck(cudaMemcpy(node.weights, dWeightArr,
-                            numFeatures * sizeof(float),
-                            cudaMemcpyDeviceToHost));
+  // cudaErrorCheck(cudaMemcpy(node.weights, dWeightArr,
+  //                           numFeatures * sizeof(float),
+  //                           cudaMemcpyDeviceToHost));
 
   time(&end);
   dif = difftime(end, start);

@@ -40,7 +40,7 @@ int main(int argc, const char **argv) {
   }
 
   loaddata();
-  // learn();
+  learn();
   test();
 
   return 0;
@@ -155,7 +155,7 @@ static void learn() {
 
   while (iter < 0 || iter-- > 0) {
     err = 0.0f;
-
+    train_cnt == 1;
     for (int i = 0; i < train_cnt; ++i) {
       float tmp_err;
 

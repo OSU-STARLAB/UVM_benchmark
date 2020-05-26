@@ -103,7 +103,7 @@ void processDWT(struct dwt *d, int forward, int writeVisual) {
 
   cudaMallocManaged(&backup, componentSize); //< aligned component size
   cudaCheckError("Alloc device memory");
-  cudaMemset(backup, 0, componentSize);
+  // cudaMemset(backup, 0, componentSize);
   cudaCheckError("Memset device memory");
 
   if (d->components == 3) {

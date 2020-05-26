@@ -185,7 +185,7 @@ int main()
             dWeightArr,
             1 ) );
     }
-    cudaErrorCheck( cudaThreadSynchronize() );
+    cudaErrorCheck( cudaDeviceSynchronize() );
 
     cublasErrorCheck( cublasDestroy( cublasHandle ) );
     cudaErrorCheck( cudaMemcpy(

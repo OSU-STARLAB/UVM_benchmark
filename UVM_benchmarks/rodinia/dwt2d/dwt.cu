@@ -79,7 +79,7 @@ int nStage2dDWT(T * in, T * out, T * backup, int pixWidth, int pixHeight, int st
     
     /* create backup of input, because each test iteration overwrites it */
     const int size = pixHeight * pixWidth * sizeof(T);
-    cudaMemcpy(backup, in, size, cudaMemcpyDeviceToDevice);
+    // cudaMemcpy(backup, in, size, cudaMemcpyDeviceToDevice);
     cudaCheckError("Memcopy device to device");
     
     /* Measure time of individual levels. */
@@ -193,15 +193,15 @@ int writeLinear(T *component_cuda, int pixWidth, int pixHeight,
     int samplesNum = pixWidth*pixHeight;
 
     size = samplesNum*sizeof(T);
-    cudaMallocHost((void **)&gpu_output, size);
-    cudaCheckError("Malloc host");
-    memset(gpu_output, 0, size);
+    // cudaMallocHost((void **)&gpu_output, size);
+    // cudaCheckError("Malloc host");
+    // memset(gpu_output, 0, size);
     result = (unsigned char *)malloc(samplesNum);
-    cudaMemcpy(gpu_output, component_cuda, size, cudaMemcpyDeviceToHost);
+    // cudaMemcpy(gpu_output, component_cuda, size, cudaMemcpyDeviceToHost);
     cudaCheckError("Memcopy device to host");
 
     /* T to char */
-    samplesToChar(result, gpu_output, samplesNum);
+    samplesToChar(result, component_cuda, samplesNum);
 
     /* Write component */
     char outfile[strlen(filename)+strlen(suffix)];
@@ -218,8 +218,8 @@ int writeLinear(T *component_cuda, int pixWidth, int pixHeight,
     close(i);
 
     /* Clean up */
-    cudaFreeHost(gpu_output);
-    cudaCheckError("Cuda free host memory");
+    // cudaFreeHost(gpu_output);
+    // cudaCheckError("Cuda free host memory");
     free(result);
     if(x == 0) return 1;
     return 0;
@@ -285,19 +285,19 @@ int writeNStage2DDWT(T *component_cuda, int pixWidth, int pixHeight,
 #endif
     
     size = samplesNum*sizeof(T);
-    cudaMallocHost((void **)&src, size);
-    cudaCheckError("Malloc host");
+    // cudaMallocHost((void **)&src, size);
+    // cudaCheckError("Malloc host");
     dst = (T*)malloc(size);
-    memset(src, 0, size);
+    // memset(src, 0, size);
     memset(dst, 0, size);
     result = (unsigned char *)malloc(samplesNum);
-    cudaMemcpy(src, component_cuda, size, cudaMemcpyDeviceToHost);
+    // cudaMemcpy(src, component_cuda, size, cudaMemcpyDeviceToHost);
     cudaCheckError("Memcopy device to host");
 
     // LL Band
     size = bandDims[stages-1].LL.dimX * sizeof(T);
     for (i = 0; i < bandDims[stages-1].LL.dimY; i++) {
-        memcpy(dst+i*pixWidth, src+i*bandDims[stages-1].LL.dimX, size);
+        memcpy(dst+i*pixWidth, component_cuda+i*bandDims[stages-1].LL.dimX, size);
     }
 
     for (s = stages - 1; s >= 0; s--) {
@@ -306,7 +306,7 @@ int writeNStage2DDWT(T *component_cuda, int pixWidth, int pixHeight,
         offset = bandDims[s].LL.dimX * bandDims[s].LL.dimY;
         for (i = 0; i < bandDims[s].HL.dimY; i++) {
             memcpy(dst+i*pixWidth+bandDims[s].LL.dimX,
-                src+offset+i*bandDims[s].HL.dimX, 
+                component_cuda+offset+i*bandDims[s].HL.dimX, 
                 size);
         }
 
@@ -316,7 +316,7 @@ int writeNStage2DDWT(T *component_cuda, int pixWidth, int pixHeight,
         yOffset = bandDims[s].LL.dimY;
         for (i = 0; i < bandDims[s].HL.dimY; i++) {
             memcpy(dst+(yOffset+i)*pixWidth,
-                src+offset+i*bandDims[s].LH.dimX, 
+            component_cuda+offset+i*bandDims[s].LH.dimX, 
                 size);
         }
 
@@ -326,7 +326,7 @@ int writeNStage2DDWT(T *component_cuda, int pixWidth, int pixHeight,
         yOffset = bandDims[s].HL.dimY;
         for (i = 0; i < bandDims[s].HH.dimY; i++) {
             memcpy(dst+(yOffset+i)*pixWidth+bandDims[s].LH.dimX,
-                src+offset+i*bandDims[s].HH.dimX, 
+            component_cuda+offset+i*bandDims[s].HH.dimX, 
                 size);
         }
     }
@@ -347,8 +347,8 @@ int writeNStage2DDWT(T *component_cuda, int pixWidth, int pixHeight,
     x = write(i, result, samplesNum);
     close(i);
 
-    cudaFreeHost(src);
-    cudaCheckError("Cuda free host memory");
+    // cudaFreeHost(src);
+    // cudaCheckError("Cuda free host memory");
     free(dst);
     free(result);
     free(bandDims);

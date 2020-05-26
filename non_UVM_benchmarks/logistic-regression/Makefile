@@ -16,23 +16,23 @@ NVCCCFLAGS = -arch=sm_60 -std=c++11 -use_fast_math -lcublas# -lcublas_device -rd
 
 ################################ Compile ################################
 
-# gpu_exec: ${OBJECTS} LogisticRegression_CuBLAS.cu
-#	$(NVCC) ${NVCCCFLAGS} -o $@ ${OBJECTS} LogisticRegression_CuBLAS.cu
-
-# Helper.o: Helper.c Helper.h BasicDataStructures.h
-#	$(CC) ${CFLAGS} -c Helper.c
-
-#ArffImporter.o: ArffImporter.cpp ArffImporter.h BasicDataStructures.h Helper.h
-#	$(CC) ${CFLAGS} -c ArffImporter.cpp
-
-exec: ${OBJECTS} LogisticRegression_Serial.c
-	$(CC) ${CFLAGS} -o $@ ${OBJECTS} LogisticRegression_Serial.c
+gpu_exec: ${OBJECTS} LogisticRegression_CuBLAS.cu
+	$(NVCC) ${NVCCCFLAGS} -o $@ ${OBJECTS} LogisticRegression_CuBLAS.cu
 
 Helper.o: Helper.c Helper.h BasicDataStructures.h
 	$(CC) ${CFLAGS} -c Helper.c
 
 ArffImporter.o: ArffImporter.cpp ArffImporter.h BasicDataStructures.h Helper.h
 	$(CC) ${CFLAGS} -c ArffImporter.cpp
+
+# exec: ${OBJECTS} LogisticRegression_Serial.c
+# 	$(CC) ${CFLAGS} -o $@ ${OBJECTS} LogisticRegression_Serial.c
+
+# Helper.o: Helper.c Helper.h BasicDataStructures.h
+# 	$(CC) ${CFLAGS} -c Helper.c
+
+# ArffImporter.o: ArffImporter.cpp ArffImporter.h BasicDataStructures.h Helper.h
+# 	$(CC) ${CFLAGS} -c ArffImporter.cpp
 
 ################################# Clean #################################
 

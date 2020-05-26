@@ -77,15 +77,15 @@ int runHisto(char* file, unsigned int* freq, unsigned int memSize, unsigned int 
     int totalNum = memSize/sizeof(unsigned int);
     int partialNum = partSize/sizeof(unsigned int);
 
-    unsigned char *dev_buffer0; 
-    unsigned char *dev_buffer1;
-    unsigned int *dev_histo;
-    cudaMalloc( (void**)&dev_buffer0, partSize ) ;
-    cudaMalloc( (void**)&dev_buffer1, partSize ) ;
-    cudaMalloc( (void**)&dev_histo,
-            256 * sizeof( int ) ) ;
-    cudaMemset( dev_histo, 0,
-            256 * sizeof( int ) ) ;
+    // unsigned char *dev_buffer0; 
+    // unsigned char *dev_buffer1;
+    // unsigned int *dev_histo;
+    // cudaMalloc( (void**)&dev_buffer0, partSize ) ;
+    // cudaMalloc( (void**)&dev_buffer1, partSize ) ;
+    // cudaMalloc( (void**)&dev_histo,
+    //         256 * sizeof( int ) ) ;
+    // cudaMemset( dev_histo, 0,
+    //         256 * sizeof( int ) ) ;
     cudaStream_t stream0, stream1;
     CHECK(cudaStreamCreate(&stream0));
     CHECK(cudaStreamCreate(&stream1));
@@ -98,17 +98,17 @@ int runHisto(char* file, unsigned int* freq, unsigned int memSize, unsigned int 
     for(int i = 0; i < totalNum; i+=partialNum*2)
     {
 
-        CHECK(cudaMemcpyAsync(dev_buffer0, buffer+i, partSize, cudaMemcpyHostToDevice,stream0));
-        CHECK(cudaMemcpyAsync(dev_buffer1, buffer+i+partialNum, partSize, cudaMemcpyHostToDevice,stream1));
+        // CHECK(cudaMemcpyAsync(dev_buffer0, buffer+i, partSize, cudaMemcpyHostToDevice,stream0));
+        // CHECK(cudaMemcpyAsync(dev_buffer1, buffer+i+partialNum, partSize, cudaMemcpyHostToDevice,stream1));
 
 
         // kernel launch - 2x the number of mps gave best timing
-        histo_kernel<<<blocks*2,256,0,stream0>>>( dev_buffer0, partSize, dev_histo );
-        histo_kernel<<<blocks*2,256,0,stream1>>>( dev_buffer1, partSize, dev_histo );
+        histo_kernel<<<blocks*2,256,0,stream0>>>( buffer+i, partSize, freq );
+        histo_kernel<<<blocks*2,256,0,stream1>>>( buffer+i+partialNum, partSize, freq );
     }
     CHECK(cudaStreamSynchronize(stream0));
     CHECK(cudaStreamSynchronize(stream1));
-    cudaMemcpy( freq, dev_histo, 256 * sizeof( int ), cudaMemcpyDeviceToHost );
+    // cudaMemcpy( freq, dev_histo, 256 * sizeof( int ), cudaMemcpyDeviceToHost );
     ( cudaEventRecord( stop, 0 ) );
     ( cudaEventSynchronize( stop ) );
     float   elapsedTime;
@@ -118,8 +118,8 @@ int runHisto(char* file, unsigned int* freq, unsigned int memSize, unsigned int 
 
 
 
-    cudaFree( dev_histo );
-    cudaFree( dev_buffer0 );
-    cudaFree( dev_buffer1 );
+    // cudaFree( dev_histo );
+    // cudaFree( dev_buffer0 );
+    // cudaFree( dev_buffer1 );
     return 0;
 }
