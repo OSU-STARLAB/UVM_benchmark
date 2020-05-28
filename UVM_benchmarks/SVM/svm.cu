@@ -33,8 +33,8 @@ int main(int argc, char const *argv[]) {
   cout << "C = " << C << " and M = " << M << " with accuracy = " << ACCURACY
        << endl;
 
-  int class1_limit = 10;
-  int class2_limit = 10;
+  int class1_limit = 2;
+  int class2_limit = 2;
   int number_of_SVMs = ((class1_limit - 1) * class2_limit) / 2;
   cout << "Will train " << number_of_SVMs << " SVMs" << endl;
 

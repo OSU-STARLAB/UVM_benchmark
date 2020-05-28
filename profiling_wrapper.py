@@ -5,11 +5,15 @@ import time
 from time import localtime, strftime
 
 
-# folders = ["bfs", "BN", "CNN", "kmeans", "knn", "logistic-regression", "rodinia","SVM"]
-# files = ["", "", "", "","", "","", "","", "","", "","", "","", ""]
+
 folders = ["BN", "bfs", "CNN", "kmeans", "knn", "logistic-regression", "SVM", "rodinia", "polybench"]
 subfolders = ["backprop", "cfd", "dwt2d", "gaussian", "hotspot", "hotspot3D", "huffman", "nn", "nw", "particlefilter", "pathfinder", "srad", "streamcluster"]
 subfolders2 = ["2DCONV", "2MM", "3DCONV", "3MM", "ATAX", "BICG", "CORR", "COVAR", "FDTD-2D", "GEMM", "GESUMMV", "GRAMSCHM", "MVT", "SYR2K", "SYRK"]
+
+
+# folders = ["polybench"]
+
+
 UVM_flag = False
 print_options = "--print-gpu-trace --csv  --track-memory-allocations off --profile-child-processes"
 print_file = " --log-file "
@@ -21,6 +25,10 @@ output_sub_path = " ../../../results/"
 
 print_general_options = "--csv  --track-memory-allocations off --profile-child-processes "
 
+# metric_list = metrics[24]
+# metric_list = metrics[8] + metrics[12]
+metric_list = metrics[75]
+
 def profile_details():
     for UVM_flag in [True, False]:
         base_path = "UVM_benchmarks/"
@@ -29,33 +37,50 @@ def profile_details():
         for i, folder in enumerate(folders):
             if folder != "rodinia" and folder != "polybench":
                 path = base_path + folder + "/"
-                command = "cd " + path
-                command = "cd " + path + "; nvprof " + print_options + print_file + folder + "_%p_metric.csv"  + " " + metrics[24]  + metrics[8] + metrics[12] + " " + " ./run"
-                print(command)
-                os.system(command)
-                command = "cd " + path + "; nvprof " + print_options + print_file + folder + "_%p_summary.csv"   + " " + " ./run"
-                print(command)
-                os.system(command)
+                if UVM_flag:
+                    command = "cd " + path + "; nvprof " + print_general_options + print_file + output_path + time_str + "/"+ folder + "_%p_metric_UVM.csv"  + " " + metric_list + " " + " ./run"
+                    print(command)
+                    os.system(command)
+                    # command = "cd " + path + "; nvprof " + print_general_options + print_file + output_path + time_str + "/" + folder + "_%p_summary_UVM.csv"   + " " + " ./run"
+                    # print(command)
+                    # os.system(command)
+                else:
+                    command = "cd " + path + "; nvprof " + print_general_options + print_file + output_path + time_str + "/"+ folder + "_%p_metric_non_UVM.csv"  + " " + metric_list + " " + " ./run"
+                    print(command)
+                    os.system(command)
+                    # command = "cd " + path + "; nvprof " + print_general_options + print_file + output_path + time_str + "/" + folder + "_%p_summary_non_UVM.csv"   + " " + " ./run"
+                    # print(command)
+                    # os.system(command)                   
             elif folder == "polybench":
                 for j, subfolder in enumerate(subfolders2):
                     path = base_path + folder + "/" + subfolder
-                    command = "cd " + path
-                    command = "cd " + path + "; nvprof " + print_options + print_file + subfolder + "_%p_metric.csv" + " "  + metrics[24]  + metrics[8] + metrics[12] + " " + " ./run"
+                    if UVM_flag:
+                        command = "cd " + path + "; nvprof " + print_general_options + print_file + output_sub_path + time_str + "/"+ subfolder + "_%p_metric_UVM.csv" + " "  + metric_list + " " + " ./run"
+                    else:
+                        command = "cd " + path + "; nvprof " + print_general_options + print_file + output_sub_path + time_str + "/"+ subfolder + "_%p_metric_non_UVM.csv" + " "  + metric_list + " " + " ./run"
                     print(command)
                     os.system(command)
-                    command = "cd " + path + "; nvprof " + print_options + print_file + subfolder + "_%p_summary.csv" + " " + " ./run"
-                    print(command)
-                    os.system(command)
+                    # command = "cd " + path + "; nvprof " + print_general_options + print_file+ output_sub_path + time_str + "/" + subfolder + "_%p_summary.csv" + " " + " ./run"
+                    # print(command)
+                    # os.system(command)
             else:
                 for j, subfolder in enumerate(subfolders):
-                    path = base_path + folder + "/" + subfolder
-                    command = "cd " + path
-                    command = "cd " + path + "; nvprof " + print_general_options + print_file + subfolder + "_%p_metric.csv" + " "  + metrics[24]  + metrics[8] + metrics[12] + " " + " ./run"
-                    print(command)
-                    os.system(command)
-                    command = "cd " + path + "; nvprof " + print_general_options + print_file + subfolder + "_%p_summary.csv" + " " + " ./run"
-                    print(command)
-                    os.system(command)
+                    if UVM_flag:
+                        path = base_path + folder + "/" + subfolder
+                        command = "cd " + path + "; nvprof " + print_general_options + print_file+ output_sub_path + time_str + "/" + subfolder + "_%p_metric_UVM.csv" + " "  + metric_list + " " + " ./run"
+                        print(command)
+                        os.system(command)
+                        # command = "cd " + path + "; nvprof " + print_general_options + print_file + output_sub_path + time_str + "/"+ subfolder + "_%p_summary_UVM.csv" + " " + " ./run"
+                        # print(command)
+                        # os.system(command)
+                    else:
+                        path = base_path + folder + "/" + subfolder
+                        command = "cd " + path + "; nvprof " + print_general_options + print_file+ output_sub_path + time_str + "/" + subfolder + "_%p_metric_non_UVM.csv" + " "  + metric_list + " " + " ./run"
+                        print(command)
+                        os.system(command)
+                        # command = "cd " + path + "; nvprof " + print_general_options + print_file + output_sub_path + time_str + "/"+ subfolder + "_%p_summary_non_UVM.csv" + " " + " ./run"
+                        # print(command)
+                        # os.system(command)
 
 def profile_general():
     for UVM_flag in [True, False]:
@@ -92,4 +117,4 @@ def profile_general():
 
 
 if __name__ == "__main__":
-    profile_general()
+    profile_details()
