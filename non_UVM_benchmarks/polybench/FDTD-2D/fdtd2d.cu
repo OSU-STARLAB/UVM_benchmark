@@ -226,11 +226,19 @@ int main()
 	DATA_TYPE* hz;
 	DATA_TYPE* hz_outputFromGpu;
 
-	_fict_ = (DATA_TYPE*)malloc(tmax*sizeof(DATA_TYPE));
-	ex = (DATA_TYPE*)malloc(NX*(NY+1)*sizeof(DATA_TYPE));
-	ey = (DATA_TYPE*)malloc((NX+1)*NY*sizeof(DATA_TYPE));
-	hz = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
-	hz_outputFromGpu = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
+	// _fict_ = (DATA_TYPE*)malloc(tmax*sizeof(DATA_TYPE));
+	// ex = (DATA_TYPE*)malloc(NX*(NY+1)*sizeof(DATA_TYPE));
+	// ey = (DATA_TYPE*)malloc((NX+1)*NY*sizeof(DATA_TYPE));
+	// hz = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
+	// hz_outputFromGpu = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
+
+
+	cudaMallocHost((void **)&_fict_,tmax*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&ex,NX*(NY+1)*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&ey,(NX+1)*NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&hz,NX*NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&hz_outputFromGpu,NX*NY*sizeof(DATA_TYPE));
+
 
 	init_arrays(_fict_, ex, ey, hz);
 
@@ -245,11 +253,11 @@ int main()
 	
 	compareResults(hz, hz_outputFromGpu);
 
-	free(_fict_);
-	free(ex);
-	free(ey);
-	free(hz);
-	free(hz_outputFromGpu);
+	cudaFree(_fict_);
+	cudaFree(ex);
+	cudaFree(ey);
+	cudaFree(hz);
+	cudaFree(hz_outputFromGpu);
 
 	return 0;
 }

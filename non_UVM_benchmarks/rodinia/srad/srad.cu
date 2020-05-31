@@ -92,7 +92,14 @@ runTest( int argc, char** argv)
     size_R = (r2-r1+1)*(c2-c1+1);   
 
 	I = (float *)malloc( size_I * sizeof(float) );
-    J = (float *)malloc( size_I * sizeof(float) );
+
+	#ifdef CPU
+	J = (float *)malloc( size_I * sizeof(float) );
+	#endif
+
+	#ifdef GPU
+	cudaMallocHost((void **)&J,size_I * sizeof(float));
+	#endif
 	c  = (float *)malloc(sizeof(float)* size_I) ;
 
 
@@ -253,10 +260,13 @@ runTest( int argc, char** argv)
 	printf("Computation Done\n");
 
 	free(I);
-	free(J);
+
+
+	
 #ifdef CPU
 	free(iN); free(iS); free(jW); free(jE);
-    free(dN); free(dS); free(dW); free(dE);
+	free(dN); free(dS); free(dW); free(dE);
+	free(J);
 #endif
 #ifdef GPU
     cudaFree(C_cuda);
@@ -265,6 +275,7 @@ runTest( int argc, char** argv)
 	cudaFree(W_C);
 	cudaFree(N_C);
 	cudaFree(S_C);
+	cudaFree(J);
 #endif 
 	free(c);
   

@@ -304,9 +304,12 @@ void run(int argc, char** argv)
     int blockCols = grid_cols/smallBlockCol+((grid_cols%smallBlockCol==0)?0:1);
     int blockRows = grid_rows/smallBlockRow+((grid_rows%smallBlockRow==0)?0:1);
 
-    FilesavingTemp = (float *) malloc(size*sizeof(float));
-    FilesavingPower = (float *) malloc(size*sizeof(float));
-    MatrixOut = (float *) calloc (size, sizeof(float));
+//     FilesavingTemp = (float *) malloc(size*sizeof(float));
+//     FilesavingPower = (float *) malloc(size*sizeof(float));
+//     MatrixOut = (float *) calloc (size, sizeof(float));
+cudaMallocHost((void **)&FilesavingTemp,size * sizeof(float));
+cudaMallocHost((void **)&FilesavingPower,size* sizeof(float));
+cudaMallocHost((void **)&MatrixOut,size * sizeof(float));
 
     if( !FilesavingPower || !FilesavingTemp || !MatrixOut)
         fatal("unable to allocate memory");
@@ -338,5 +341,7 @@ void run(int argc, char** argv)
     cudaFree(MatrixPower);
     cudaFree(MatrixTemp[0]);
     cudaFree(MatrixTemp[1]);
-    free(MatrixOut);
+    cudaFree(MatrixOut);
+    cudaFree(FilesavingPower);
+    cudaFree(FilesavingTemp);
 }

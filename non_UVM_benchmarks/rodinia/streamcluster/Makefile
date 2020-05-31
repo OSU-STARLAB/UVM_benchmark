@@ -25,8 +25,8 @@ ifeq ($(dp),1)
 endif
 
 
-$(TARGET_G): streamcluster_cuda_cpu.cpp streamcluster_cuda.cu streamcluster_header.cu
-	$(NVCC) $(NVCC_FLAGS) streamcluster_cuda_cpu.cpp streamcluster_cuda.cu streamcluster_header.cu -o $(TARGET_G) -lcuda
+$(TARGET_G): streamcluster_cuda_cpu.cu streamcluster_cuda.cu streamcluster_header.cu
+	$(NVCC) $(NVCC_FLAGS) streamcluster_cuda_cpu.cu streamcluster_cuda.cu streamcluster_header.cu -o $(TARGET_G) -lcuda
 	
 
 clean:

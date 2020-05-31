@@ -186,11 +186,20 @@ int main(int argc, char** argv)
 	DATA_TYPE* y_outputFromGpu;
 	DATA_TYPE* tmp;
 
-	A = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
-	x = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
-	y = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
-	y_outputFromGpu = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
-	tmp = (DATA_TYPE*)malloc(NX*sizeof(DATA_TYPE));
+	// A = (DATA_TYPE*)malloc(NX*NY*sizeof(DATA_TYPE));
+	// x = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
+	// y = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
+	// y_outputFromGpu = (DATA_TYPE*)malloc(NY*sizeof(DATA_TYPE));
+	// tmp = (DATA_TYPE*)malloc(NX*sizeof(DATA_TYPE));
+
+	cudaMallocHost((void **)&A,NX*NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&x,NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&y,NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&y_outputFromGpu,NY*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&tmp,NX*sizeof(DATA_TYPE));
+
+	// cudaMallocHost((void **)&A, NI*NK*sizeof(DATA_TYPE));
+
 
 	init_array(x, A);
 
@@ -204,11 +213,11 @@ int main(int argc, char** argv)
 
 	compareResults(y, y_outputFromGpu);
 
-	free(A);
-	free(x);
-	free(y);
-	free(y_outputFromGpu);
-	free(tmp);
+	cudaFree(A);
+	cudaFree(x);
+	cudaFree(y);
+	cudaFree(y_outputFromGpu);
+	cudaFree(tmp);
 
   	return 0;
 }

@@ -105,3 +105,6 @@ non_UVM_benchmarks/rodinia/pathfinder/pathfinder
 non_UVM_benchmarks/rodinia/srad/srad
 non_UVM_benchmarks/rodinia/streamcluster/sc_gpu
 *.exe
+test
+non_UVM_benchmarks/logistic-regression/gpu_exec
+non_UVM_benchmarks/knn/knn

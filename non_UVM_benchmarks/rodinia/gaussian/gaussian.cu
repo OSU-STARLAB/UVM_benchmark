@@ -134,14 +134,17 @@ int main(int argc, char *argv[])
               Size = atoi(argv[i]);
 	      printf("Create matrix internally in parse, size = %d \n", Size);
 
-	      a = (float *) malloc(Size * Size * sizeof(float));
+		//   a = (float *) malloc(Size * Size * sizeof(float));
+		  cudaMallocHost((void **)&a,Size * Size * sizeof(float));
 	      create_matrix(a, Size);
 
-	      b = (float *) malloc(Size * sizeof(float));
+		//   b = (float *) malloc(Size * sizeof(float));
+		  cudaMallocHost((void **)&b, Size * sizeof(float));
 	      for (j =0; j< Size; j++)
 	    	b[j]=1.0;
 
-	      m = (float *) malloc(Size * Size * sizeof(float));
+		//   m = (float *) malloc(Size * Size * sizeof(float));
+		cudaMallocHost((void **)&m,Size * Size * sizeof(float));
               break;
             case 'f': // platform
               i++;
@@ -190,9 +193,9 @@ int main(int argc, char *argv[])
     /*printf("%d,%d\n",size,time_total);
     fprintf(stderr,"%d,%d\n",size,time_total);*/
     
-    free(m);
-    free(a);
-    free(b);
+    cudaFree(m);
+    cudaFree(a);
+    cudaFree(b);
 }
 /*------------------------------------------------------
  ** PrintDeviceProperties

@@ -170,9 +170,12 @@ int main()
 	DATA_TYPE* C;
 	DATA_TYPE* C_outputFromGpu;
 
-	A = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
-	C = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
-	C_outputFromGpu = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
+	// A = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
+	// C = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
+	// C_outputFromGpu = (DATA_TYPE*)malloc(N*M*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&A,N*M*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&C,N*M*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&C_outputFromGpu,N*M*sizeof(DATA_TYPE));
 
 	init_arrays(A, C);
 	
@@ -186,9 +189,9 @@ int main()
 
 	compareResults(C, C_outputFromGpu);
 
-	free(A);
-	free(C);
-	free(C_outputFromGpu);
+	cudaFree(A);
+	cudaFree(C);
+	cudaFree(C_outputFromGpu);
 
 	return 0;
 }

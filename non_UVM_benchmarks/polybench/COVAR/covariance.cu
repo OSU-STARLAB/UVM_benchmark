@@ -234,10 +234,15 @@ int main()
 	DATA_TYPE* mean;
 	DATA_TYPE* symmat_outputFromGpu;	
 
-	data = (DATA_TYPE*)malloc((M+1)*(N+1)*sizeof(DATA_TYPE));
-	symmat = (DATA_TYPE*)malloc((M+1)*(M+1)*sizeof(DATA_TYPE));
-	mean = (DATA_TYPE*)malloc((M+1)*sizeof(DATA_TYPE));
-	symmat_outputFromGpu = (DATA_TYPE*)malloc((M+1)*(M+1)*sizeof(DATA_TYPE));	
+	// data = (DATA_TYPE*)malloc((M+1)*(N+1)*sizeof(DATA_TYPE));
+	// symmat = (DATA_TYPE*)malloc((M+1)*(M+1)*sizeof(DATA_TYPE));
+	// mean = (DATA_TYPE*)malloc((M+1)*sizeof(DATA_TYPE));
+	// symmat_outputFromGpu = (DATA_TYPE*)malloc((M+1)*(M+1)*sizeof(DATA_TYPE));	
+
+	cudaMallocHost((void **)&data,(M+1)*(N+1)*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&symmat,(M+1)*(M+1)*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&mean,(M+1)*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&symmat_outputFromGpu,(M+1)*(M+1)*sizeof(DATA_TYPE));	
 
 	init_arrays(data);
     
@@ -252,10 +257,10 @@ int main()
 
 	compareResults(symmat, symmat_outputFromGpu);
 
-	free(data);
-	free(symmat);
-	free(mean);
-	free(symmat_outputFromGpu);	
+	cudaFree(data);
+	cudaFree(symmat);
+	cudaFree(mean);
+	cudaFree(symmat_outputFromGpu);	
 
   	return 0;
 }

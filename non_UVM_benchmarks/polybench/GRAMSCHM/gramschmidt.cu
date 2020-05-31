@@ -215,10 +215,19 @@ int main(int argc, char *argv[])
 	DATA_TYPE* R;
 	DATA_TYPE* Q;
 	
-	A = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));
-	A_outputFromGpu = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));
-	R = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));  
-	Q = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));  
+	// A = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));
+	// A_outputFromGpu = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));
+	// R = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));  
+	// Q = (DATA_TYPE*)malloc(M*N*sizeof(DATA_TYPE));  
+	
+
+	cudaMallocHost((void **)&A,M*N*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&A_outputFromGpu,M*N*sizeof(DATA_TYPE));
+	cudaMallocHost((void **)&R,M*N*sizeof(DATA_TYPE));  
+	cudaMallocHost((void **)&Q,M*N*sizeof(DATA_TYPE));  
+
+
+
 	
 	init_array(A);
 	
@@ -233,10 +242,10 @@ int main(int argc, char *argv[])
 	
 	compareResults(A, A_outputFromGpu);
 	
-	free(A);
-	free(A_outputFromGpu);
-	free(R);
-	free(Q);  
+	cudaFree(A);
+	cudaFree(A_outputFromGpu);
+	cudaFree(R);
+	cudaFree(Q);  
 
     	return 0;
 }

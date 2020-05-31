@@ -98,9 +98,12 @@ void runTest( int argc, char** argv)
 
 	max_rows = max_rows + 1;
 	max_cols = max_cols + 1;
-	referrence = (int *)malloc( max_rows * max_cols * sizeof(int) );
-    input_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
-	output_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
+	// referrence = (int *)malloc( max_rows * max_cols * sizeof(int) );
+    // input_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
+	// output_itemsets = (int *)malloc( max_rows * max_cols * sizeof(int) );
+	cudaMallocHost((void **)&referrence,max_rows * max_cols * sizeof(int));
+	cudaMallocHost((void **)&input_itemsets,max_rows * max_cols * sizeof(int));
+	cudaMallocHost((void **)&output_itemsets,max_rows * max_cols * sizeof(int));
 	
 
 	if (!input_itemsets)
@@ -232,9 +235,9 @@ void runTest( int argc, char** argv)
 	cudaFree(referrence_cuda);
 	cudaFree(matrix_cuda);
 
-	free(referrence);
-	free(input_itemsets);
-	free(output_itemsets);
+	cudaFree(referrence);
+	cudaFree(input_itemsets);
+	cudaFree(output_itemsets);
 	
 }
 

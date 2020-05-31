@@ -7,7 +7,7 @@ from time import localtime, strftime
 
 
 folders = ["BN", "bfs", "CNN", "kmeans", "knn", "logistic-regression", "SVM", "rodinia", "polybench"]
-subfolders = ["backprop", "cfd", "dwt2d", "gaussian", "hotspot", "hotspot3D", "huffman", "nn", "nw", "particlefilter", "pathfinder", "srad", "streamcluster"]
+subfolders = ["backprop", "dwt2d", "gaussian", "hotspot", "hotspot3D", "nn", "nw", "particlefilter", "pathfinder", "srad", "streamcluster"]
 subfolders2 = ["2DCONV", "2MM", "3DCONV", "3MM", "ATAX", "BICG", "CORR", "COVAR", "FDTD-2D", "GEMM", "GESUMMV", "GRAMSCHM", "MVT", "SYR2K", "SYRK"]
 
 

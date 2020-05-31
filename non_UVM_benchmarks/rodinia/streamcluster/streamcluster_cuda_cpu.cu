@@ -769,7 +769,8 @@ void streamCluster( PStream* stream,
   Points points;
   points.dim = dim;
   points.num = chunksize;
-  points.p = (Point *)malloc(chunksize*sizeof(Point));
+  cudaMallocHost((void **)&points.p,chunksize*sizeof(Point));
+  // points.p = (Point *)malloc(chunksize*sizeof(Point));
   for( int i = 0; i < chunksize; i++ ) {
     points.p[i].coord = &block[i*dim];		
   }
@@ -804,7 +805,9 @@ void streamCluster( PStream* stream,
 
     switch_membership = (bool*)malloc(points.num*sizeof(bool));
     is_center = (bool*)calloc(points.num,sizeof(bool));
-    center_table = (int*)malloc(points.num*sizeof(int));
+
+    // center_table = (int*)malloc(points.num*sizeof(int));
+    cudaMallocHost((void **)&center_table,points.num*sizeof(int));
 
     localSearch(&points,kmin, kmax,&kfinal);
 	
@@ -832,7 +835,8 @@ void streamCluster( PStream* stream,
 	
     free(is_center);
     free(switch_membership);
-    free(center_table);
+    // free(center_table);
+    cudaFree(center_table);
 	
     if( stream->feof() ) {
       break;
@@ -842,7 +846,8 @@ void streamCluster( PStream* stream,
   //finally cluster all temp centers
   switch_membership = (bool*)malloc(centers.num*sizeof(bool));
   is_center = (bool*)calloc(centers.num,sizeof(bool));
-  center_table = (int*)malloc(centers.num*sizeof(int));
+  // center_table = (int*)malloc(centers.num*sizeof(int));
+  cudaMallocHost((void **)&center_table,centers.num*sizeof(int));
   
   localSearch( &centers, kmin, kmax ,&kfinal );
   contcenters(&centers);

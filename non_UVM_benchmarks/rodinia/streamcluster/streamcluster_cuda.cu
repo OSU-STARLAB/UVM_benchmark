@@ -104,7 +104,8 @@ void allocDevMem(int num, int dim)
 //=======================================
 void allocHostMem(int num, int dim)
 {
-	coord_h	= (float*) malloc( num * dim * sizeof(float) );
+	// coord_h	= (float*) malloc( num * dim * sizeof(float) );
+	cudaMallocHost((void **)&coord_h, num * dim * sizeof(float));
 }
 
 //=======================================
@@ -123,7 +124,7 @@ void freeDevMem()
 //=======================================
 void freeHostMem()
 {
-	free(coord_h);
+	cudaFree(coord_h);
 }
 
 //=======================================
@@ -153,6 +154,7 @@ float pgain( long x, Points *points, float z, long int *numcenters, int kmax, bo
 	// ALLOCATE HOST MEMORY + DATA PREPARATION
 	//=========================================
 	work_mem_h = (float*) malloc(stride * (nThread + 1) * sizeof(float) );
+	// cudaMallocHost((void **)&work_mem_h, stride * (nThread + 1) * sizeof(float));
 	// Only on the first iteration
 	if(iter == 0)
 	{

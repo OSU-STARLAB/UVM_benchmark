@@ -659,12 +659,26 @@ void particleFilter(unsigned char * I, int IszX, int IszY, int Nfr, int * seed, 
     }
 
     //initial likelihood to 0.0
-    double * likelihood = (double *) malloc(sizeof (double) *Nparticles);
-    double * arrayX = (double *) malloc(sizeof (double) *Nparticles);
-    double * arrayY = (double *) malloc(sizeof (double) *Nparticles);
-    double * xj = (double *) malloc(sizeof (double) *Nparticles);
-    double * yj = (double *) malloc(sizeof (double) *Nparticles);
-    double * CDF = (double *) malloc(sizeof (double) *Nparticles);
+    // double * likelihood = (double *) malloc(sizeof (double) *Nparticles);
+    // double * arrayX = (double *) malloc(sizeof (double) *Nparticles);
+    // double * arrayY = (double *) malloc(sizeof (double) *Nparticles);
+    // double * xj = (double *) malloc(sizeof (double) *Nparticles);
+    // double * yj = (double *) malloc(sizeof (double) *Nparticles);
+    // double * CDF = (double *) malloc(sizeof (double) *Nparticles);
+     double * likelihood ;
+    double * arrayX ;
+    double * arrayY;
+    double * xj ;
+    double * yj ;
+    double * CDF ;
+    cudaMallocHost((void **)&likelihood,Nparticles * sizeof(double));
+    cudaMallocHost((void **)&arrayX,Nparticles * sizeof(double));
+    cudaMallocHost((void **)&arrayY,Nparticles * sizeof(double));
+    cudaMallocHost((void **)&xj,Nparticles * sizeof(double));
+    cudaMallocHost((void **)&yj,Nparticles * sizeof(double));
+    cudaMallocHost((void **)&CDF,Nparticles * sizeof(double));
+
+
 
     //GPU copies of arrays
     double * arrayX_GPU;
@@ -677,9 +691,14 @@ void particleFilter(unsigned char * I, int IszX, int IszY, int Nfr, int * seed, 
     double * weights_GPU;
     int * objxy_GPU;
 
-    int * ind = (int*) malloc(sizeof (int) *countOnes * Nparticles);
+    // int * ind = (int*) malloc(sizeof (int) *countOnes * Nparticles);
+    int * ind;
+    cudaMallocHost((void **)&ind, countOnes * Nparticles * sizeof(int));
+
     int * ind_GPU;
-    double * u = (double *) malloc(sizeof (double) *Nparticles);
+    // double * u = (double *) malloc(sizeof (double) *Nparticles);
+    double * u ;
+    cudaMallocHost((void **)&u,Nparticles * sizeof(double));
     double * u_GPU;
     int * seed_GPU;
     double* partial_sums;
@@ -786,14 +805,14 @@ void particleFilter(unsigned char * I, int IszX, int IszY, int Nfr, int * seed, 
     cudaFree(arrayX_GPU);
 
     //free regular memory
-    free(likelihood);
-    free(arrayX);
-    free(arrayY);
-    free(xj);
-    free(yj);
-    free(CDF);
-    free(ind);
-    free(u);
+    cudaFree(likelihood);
+    cudaFree(arrayX);
+    cudaFree(arrayY);
+    cudaFree(xj);
+    cudaFree(yj);
+    cudaFree(CDF);
+    cudaFree(ind);
+    cudaFree(u);
 }
 
 int main(int argc, char * argv[]) {
@@ -856,12 +875,16 @@ int main(int argc, char * argv[]) {
         return 0;
     }
     //establish seed
-    int * seed = (int *) malloc(sizeof (int) *Nparticles);
+    int * seed ;
+    cudaMallocHost((void **)&seed,Nparticles * sizeof(int));
+    // = (int *) malloc(sizeof (int) *Nparticles);
     int i;
     for (i = 0; i < Nparticles; i++)
         seed[i] = time(0) * i;
     //malloc matrix
-    unsigned char * I = (unsigned char *) malloc(sizeof (unsigned char) *IszX * IszY * Nfr);
+    unsigned char * I ;
+    // = (unsigned char *) malloc(sizeof (unsigned char) *IszX * IszY * Nfr);
+    cudaMallocHost((void **)&I,sizeof (unsigned char) *IszX * IszY * Nfr);
     long long start = get_time();
     //call video sequence
     videoSequence(I, IszX, IszY, Nfr, seed);
@@ -873,7 +896,7 @@ int main(int argc, char * argv[]) {
     printf("PARTICLE FILTER TOOK %f\n", elapsed_time(endVideoSequence, endParticleFilter));
     printf("ENTIRE PROGRAM TOOK %f\n", elapsed_time(start, endParticleFilter));
 
-    free(seed);
-    free(I);
+    cudaFree(seed);
+    cudaFree(I);
     return 0;
 }

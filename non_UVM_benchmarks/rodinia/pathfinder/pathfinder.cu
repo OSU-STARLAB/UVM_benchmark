@@ -36,17 +36,17 @@ init(int argc, char** argv)
                 printf("Usage: dynproc row_len col_len pyramid_height\n");
                 exit(0);
         }
-	data = new int[rows*cols];
-
-	wall = new int*[rows];
-
+    // data = new int[rows*cols];
+    cudaMallocHost((void **)&data,rows*cols * sizeof(int));
+	// wall = new int*[rows];
+    cudaMallocHost((void**)&wall, rows * sizeof(int*));
 	for(int n=0; n<rows; n++)
 
 		wall[n]=data+cols*n;
 
-	result = new int[cols];
+	// result = new int[cols];
 
-	
+    cudaMallocHost((void **)&result,cols * sizeof(int));
 
 	int seed = M_SEED;
 
@@ -265,9 +265,13 @@ void run(int argc, char** argv)
     cudaFree(gpuResult[0]);
     cudaFree(gpuResult[1]);
 
-    delete [] data;
-    delete [] wall;
-    delete [] result;
+    // delete [] data;
+    // delete [] wall;
+    // delete [] result;
+        cudaFree(data);
+        cudaFree(result);
+        cudaFree(wall);
+
 
 }
 
