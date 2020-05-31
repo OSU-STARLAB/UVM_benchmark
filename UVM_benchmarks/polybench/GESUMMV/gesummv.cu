@@ -121,14 +121,50 @@ __global__ void gesummv_kernel(DATA_TYPE *a, DATA_TYPE *b, DATA_TYPE *x, DATA_TY
 
 void gesummvCuda(DATA_TYPE* A_gpu, DATA_TYPE* B_gpu, DATA_TYPE* x_gpu, DATA_TYPE* y_gpu, DATA_TYPE* tmp_gpu)
 {
+	cudaStream_t stream1;
+	cudaStream_t stream2;
+	cudaStream_t stream3;
+	cudaStream_t stream4;
+	cudaStream_t stream5;
+	cudaStreamCreate(&stream1);
+	cudaStreamCreate(&stream2);
+	cudaStreamCreate(&stream3);
+	cudaStreamCreate(&stream4);
+	cudaStreamCreate(&stream5);
+
+	#ifdef PREF
+	double t_start, t_end;		
+	dim3 block(DIM_THREAD_BLOCK_X, DIM_THREAD_BLOCK_Y);
+	dim3 grid((unsigned int)ceil( ((float)N) / ((float)block.x) ), 1);
+	cudaMemPrefetchAsync(A_gpu,N*N*sizeof(DATA_TYPE), GPU_DEVICE, stream1 );
+	cudaMemPrefetchAsync(B_gpu,N*N*sizeof(DATA_TYPE), GPU_DEVICE, stream2 );
+	cudaMemPrefetchAsync(x_gpu,N*sizeof(DATA_TYPE), GPU_DEVICE, stream3 );
+	cudaMemPrefetchAsync(y_gpu,N*sizeof(DATA_TYPE), GPU_DEVICE, stream4 );
+	cudaMemPrefetchAsync(tmp_gpu,N*sizeof(DATA_TYPE), GPU_DEVICE, stream5 );
+	cudaStreamSynchronize(stream1);
+	cudaStreamSynchronize(stream2);
+	cudaStreamSynchronize(stream3);
+	cudaStreamSynchronize(stream4);
+	cudaStreamSynchronize(stream5);
+	t_start = rtclock();
+	for (int i = 0; i < 1; i++){
+	gesummv_kernel<<< grid, block, 0 , stream5>>>(A_gpu,B_gpu,x_gpu, y_gpu, tmp_gpu);
+	cudaDeviceSynchronize();
+	}
+	t_end = rtclock();
+	fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);
+	#else
 	double t_start, t_end;		
 	dim3 block(DIM_THREAD_BLOCK_X, DIM_THREAD_BLOCK_Y);
 	dim3 grid((unsigned int)ceil( ((float)N) / ((float)block.x) ), 1);
 	t_start = rtclock();
+	for (int i = 0; i < 1; i++){
 	gesummv_kernel<<< grid, block>>>(A_gpu,B_gpu,x_gpu, y_gpu, tmp_gpu);
 	cudaDeviceSynchronize();
+	}
 	t_end = rtclock();
 	fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);
+	#endif
 }
 
 

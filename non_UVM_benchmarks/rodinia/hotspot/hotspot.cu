@@ -325,9 +325,12 @@ void run(int argc, char** argv)
     cudaMalloc((void**)&MatrixPower, sizeof(float)*size);
     cudaMemcpy(MatrixPower, FilesavingPower, sizeof(float)*size, cudaMemcpyHostToDevice);
     printf("Start computing the transient temperature\n");
-    int ret = compute_tran_temp(MatrixPower,MatrixTemp,grid_cols,grid_rows, \
+    int ret = 0;
+    for (int i = 0; i < 1; i++){
+    ret = compute_tran_temp(MatrixPower,MatrixTemp,grid_cols,grid_rows, \
 	 total_iterations,pyramid_height, blockCols, blockRows, borderCols, borderRows);
-	printf("Ending simulation\n");
+        printf("Ending simulation\n");
+    }
     cudaMemcpy(MatrixOut, MatrixTemp[ret], sizeof(float)*size, cudaMemcpyDeviceToHost);
 
     writeoutput(MatrixOut,grid_rows, grid_cols, ofile);

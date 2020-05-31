@@ -188,6 +188,24 @@ __global__ void dynproc_kernel(
 int calc_path(int *gpuWall, int *gpuResult[2], int rows, int cols, \
 	 int pyramid_height, int blockCols, int borderCols)
 {
+    #ifdef PREF
+    cudaStream_t stream1;
+	cudaStream_t stream2;
+    cudaStream_t stream3;
+    cudaStream_t stream4;
+	cudaStreamCreate(&stream1);
+	cudaStreamCreate(&stream2);
+    cudaStreamCreate(&stream3);
+    cudaStreamCreate(&stream4);
+	cudaMemPrefetchAsync(gpuWall,(rows*cols - cols)*sizeof(int), 0, stream1 );
+	cudaMemPrefetchAsync(gpuResult[0],sizeof(int)*cols, 0, stream2 );
+	cudaMemPrefetchAsync(gpuResult[1],sizeof(int)*cols, 0, stream3 );
+	cudaStreamSynchronize(stream1);
+	cudaStreamSynchronize(stream2);
+	cudaStreamSynchronize(stream3);
+
+
+
         dim3 dimBlock(BLOCK_SIZE);
         dim3 dimGrid(blockCols);  
 	
@@ -196,12 +214,29 @@ int calc_path(int *gpuWall, int *gpuResult[2], int rows, int cols, \
             int temp = src;
             src = dst;
             dst = temp;
-            dynproc_kernel<<<dimGrid, dimBlock>>>(
+            dynproc_kernel<<<dimGrid, dimBlock, 0 , stream4>>>(
                 MIN(pyramid_height, rows-t-1), 
                 gpuWall, gpuResult[src], gpuResult[dst],
                 cols,rows, t, borderCols);
 	}
         return dst;
+
+    #else
+        dim3 dimBlock(BLOCK_SIZE);
+        dim3 dimGrid(blockCols);  
+
+        int src = 1, dst = 0;
+        for (int t = 0; t < rows-1; t+=pyramid_height) {
+            int temp = src;
+            src = dst;
+            dst = temp;
+            dynproc_kernel<<<dimGrid, dimBlock>>>(
+                MIN(pyramid_height, rows-t-1), 
+                gpuWall, gpuResult[src], gpuResult[dst],
+                cols,rows, t, borderCols);
+    }
+        return dst;
+    #endif
 }
 
 int main(int argc, char** argv)
@@ -239,8 +274,9 @@ void run(int argc, char** argv)
     // cudaMemcpy(gpuWall, data+cols, sizeof(int)*(size-cols), cudaMemcpyHostToDevice);
     memcpy(gpuWall, data+cols, sizeof(int)*(size-cols));
 
-
-    int final_ret = calc_path(gpuWall, gpuResult, rows, cols, \
+    int final_ret;
+    for (int i = 0; i < 1; i ++)
+     final_ret = calc_path(gpuWall, gpuResult, rows, cols, \
 	 pyramid_height, blockCols, borderCols);
 
     // cudaMemcpy(result, gpuResult[final_ret], sizeof(int)*cols, cudaMemcpyDeviceToHost);

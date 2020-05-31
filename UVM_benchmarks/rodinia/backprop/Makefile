@@ -8,6 +8,7 @@ CC_FLAGS = -g  -O2 -I$(CUDA_DIR)/include
 NVCC = $(CUDA_DIR)/bin/nvcc
 NVCC_FLAGS = -I$(CUDA_DIR)/include
 
+DEF := -DPREF
 # 'make dbg=1' enables NVCC debugging
 ifeq ($(dbg),1)
 	NVCC_FLAGS += -g -O0
@@ -22,7 +23,7 @@ endif
 
 
 backprop: backprop.o facetrain.o imagenet.o backprop_cuda.o 
-	$(CC) $(CC_FLAGS) backprop.o facetrain.o imagenet.o backprop_cuda.o -o backprop -L$(CUDA_LIB_DIR)  -lcudart -lm
+	$(CC) $(CC_FLAGS) backprop.o facetrain.o imagenet.o backprop_cuda.o -o backprop -L$(CUDA_LIB_DIR)  -lcudart -lm 
 
 %.o: %.[ch]
 	$(CC) $(CC_FLAGS) $< -c
@@ -34,7 +35,7 @@ backprop.o: backprop.c backprop.h
 	$(CC) $(CC_FLAGS) backprop.c -c
 
 backprop_cuda.o: backprop_cuda.cu backprop.h
-	$(NVCC) $(NVCC_FLAGS) -c backprop_cuda.cu
+	$(NVCC) $(NVCC_FLAGS) -c backprop_cuda.cu $(DEF)
 
 imagenet.o: imagenet.c backprop.h
 	$(CC) $(CC_FLAGS) imagenet.c -c

@@ -220,6 +220,57 @@ int compute_tran_temp(float *MatrixPower, float *MatrixTemp[2], int col,
                       int row, int total_iterations, int num_iterations,
                       int blockCols, int blockRows, int borderCols,
                       int borderRows) {
+
+#ifdef PREF
+
+cudaStream_t stream1;
+cudaStream_t stream2;
+  cudaStream_t stream3;
+  cudaStream_t stream4;
+cudaStreamCreate(&stream1);
+cudaStreamCreate(&stream2);
+  cudaStreamCreate(&stream3);
+  cudaStreamCreate(&stream4);
+cudaMemPrefetchAsync(MatrixPower,row*col*sizeof(float), 0, stream1 );
+cudaMemPrefetchAsync(MatrixTemp[0],sizeof(float)*row*col, 0, stream2 );
+cudaMemPrefetchAsync(MatrixTemp[1],sizeof(float)*row*col, 0, stream3 );
+cudaStreamSynchronize(stream1);
+cudaStreamSynchronize(stream2);
+cudaStreamSynchronize(stream3);
+
+
+  dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+  dim3 dimGrid(blockCols, blockRows);
+
+  float grid_height = chip_height / row;
+  float grid_width = chip_width / col;
+
+  float Cap = FACTOR_CHIP * SPEC_HEAT_SI * t_chip * grid_width * grid_height;
+  float Rx = grid_width / (2.0 * K_SI * t_chip * grid_height);
+  float Ry = grid_height / (2.0 * K_SI * t_chip * grid_width);
+  float Rz = t_chip / (K_SI * grid_height * grid_width);
+
+  float max_slope = MAX_PD / (FACTOR_CHIP * t_chip * SPEC_HEAT_SI);
+  float step = PRECISION / max_slope;
+  float t;
+  float time_elapsed;
+  time_elapsed = 0.001;
+
+  int src = 1, dst = 0;
+
+  for (t = 0; t < total_iterations; t += num_iterations) {
+    int temp = src;
+    src = dst;
+    dst = temp;
+    calculate_temp<<<dimGrid, dimBlock,0, stream4>>>(
+        MIN(num_iterations, total_iterations - t), MatrixPower, MatrixTemp[src],
+        MatrixTemp[dst], col, row, borderCols, borderRows, Cap, Rx, Ry, Rz,
+        step, time_elapsed);
+    cudaDeviceSynchronize();
+  }
+  return dst;
+
+#else
   dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
   dim3 dimGrid(blockCols, blockRows);
 
@@ -250,6 +301,8 @@ int compute_tran_temp(float *MatrixPower, float *MatrixTemp[2], int col,
     cudaDeviceSynchronize();
   }
   return dst;
+#endif
+
 }
 
 void usage(int argc, char **argv) {
@@ -336,10 +389,14 @@ void run(int argc, char **argv) {
   //   cudaMemcpy(MatrixPower, FilesavingPower, sizeof(float) * size,
   //              cudaMemcpyHostToDevice);
   printf("Start computing the transient temperature\n");
-  int ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows,
+  int ret= 0;
+
+  for (int i = 0; i < 1; i++){
+  ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows,
                               total_iterations, pyramid_height, blockCols,
                               blockRows, borderCols, borderRows);
   printf("Ending simulation\n");
+  }
   //   cudaMemcpy(MatrixOut, MatrixTemp[ret], sizeof(float) * size,
   //              cudaMemcpyDeviceToHost);
 

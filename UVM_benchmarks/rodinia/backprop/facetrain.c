@@ -21,8 +21,8 @@ backprop_face()
   printf("Input layer size : %d\n", layer_size);
   load(net);
   //entering the training kernel, only one iteration
-  printf("Starting training kernel\n");
-  bpnn_train_cuda(net, &out_err, &hid_err);
+    printf("Starting training kernel\n");
+    bpnn_train_cuda(net, &out_err, &hid_err);
   bpnn_free(net);
   printf("Training done\n");
 }

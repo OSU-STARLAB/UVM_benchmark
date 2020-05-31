@@ -1,4 +1,4 @@
 all:
-	nvcc -O3 ${CUFILES} -o ${EXECUTABLE} 
+	nvcc -O3 ${CUFILES} ${DEF} -o ${EXECUTABLE} 
 clean:
 	rm -f *~ *.exe

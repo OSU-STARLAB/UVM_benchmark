@@ -11,7 +11,7 @@
 // includes, kernels
 #include "backprop_cuda_kernel.cu"
 #include "backprop.h"
-
+#define ITERATIONS 1
 ////////////////////////////////////////////////////////////////////////////////
 
 extern "C"
@@ -119,7 +119,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaMemcpy(input_hidden_cuda, input_weights_one_dim, (in + 1) * (hid + 1) * sizeof(float), cudaMemcpyHostToDevice);
 
   
-  
+  for(int i = 0; i < ITERATIONS; i ++){
   bpnn_layerforward_CUDA<<< grid, threads >>>(input_cuda,
 	                                          output_hidden_cuda,
 											  input_hidden_cuda,
@@ -129,7 +129,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
  
   // cudaThreadSynchronize();
   cudaDeviceSynchronize();
-  
+  }
   cudaError_t error = cudaGetLastError();
 	if (error != cudaSuccess) {
 		printf("bpnn kernel error: %s\n", cudaGetErrorString(error));
@@ -169,7 +169,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaMemcpy(input_prev_weights_cuda, input_weights_prev_one_dim, (in + 1) * (hid + 1) * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy(input_hidden_cuda, input_weights_one_dim, (in + 1) * (hid + 1) * sizeof(float), cudaMemcpyHostToDevice);
 
-
+  for(int i = 0; i < ITERATIONS; i ++){
   bpnn_adjust_weights_cuda<<< grid, threads >>>(hidden_delta_cuda,  
 												hid, 
 												input_cuda, 
@@ -177,7 +177,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
 												input_hidden_cuda, 
 												input_prev_weights_cuda
 												);
-
+                      }
   cudaMemcpy(net->input_units, input_cuda, (in + 1) * sizeof(float), cudaMemcpyDeviceToHost);
   cudaMemcpy(input_weights_one_dim, input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float), cudaMemcpyDeviceToHost);
     

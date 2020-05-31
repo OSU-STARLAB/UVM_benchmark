@@ -134,10 +134,35 @@ void convolution2DCuda(DATA_TYPE* A_gpu, DATA_TYPE* B_gpu)
 	dim3 block(DIM_THREAD_BLOCK_X, DIM_THREAD_BLOCK_Y);
 	dim3 grid((size_t)ceil( ((float)NI) / ((float)block.x) ), (size_t)ceil( ((float)NJ) / ((float)block.y)) );
 	t_start = rtclock();
-	Convolution2D_kernel<<<grid,block>>>(A_gpu,B_gpu);
-	cudaDeviceSynchronize();
+
+	#ifdef PREF
+	cudaStream_t stream1;
+	cudaStream_t stream2;
+	cudaStreamCreate(&stream1);
+	cudaStreamCreate(&stream2);
+
+	for (int i = 0; i < 1; i++)
+	{
+		cudaMemPrefetchAsync(A_gpu,NI*NJ*sizeof(DATA_TYPE), GPU_DEVICE, stream1 );
+		cudaStreamSynchronize(stream1);
+		cudaMemPrefetchAsync(B_gpu,NI*NJ*sizeof(DATA_TYPE), GPU_DEVICE, stream2 );
+		cudaStreamSynchronize(stream2);
+		// cudaMemset(B_gpu,0 ,NI*NJ*sizeof(DATA_TYPE));
+		Convolution2D_kernel<<<grid,block, 0,stream2>>>(A_gpu,B_gpu);
+		cudaDeviceSynchronize();
+	}
 	t_end = rtclock();
 	fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);//);
+	#else
+		for (int i = 0; i < 1; i++)
+		{
+			Convolution2D_kernel<<<grid,block>>>(A_gpu,B_gpu);
+			cudaDeviceSynchronize();
+		}
+		t_end = rtclock();
+		fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);//);
+	#endif
+
 
 }
 

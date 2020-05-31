@@ -12,6 +12,8 @@
 #include "backprop_cuda_kernel.cu"
 #include "backprop.h"
 
+#define ITERATIONS 1
+
 ////////////////////////////////////////////////////////////////////////////////
 
 extern "C"
@@ -65,7 +67,6 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   hid = net->hidden_n;
   out = net->output_n;   
    
-#ifdef GPU  
   int m = 0;
   float *input_hidden_cuda;
   float *input_cuda;
@@ -87,7 +88,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaMallocManaged(&input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float));
   cudaMallocManaged(&hidden_partial_sum, num_blocks * WIDTH * sizeof(float));
   cudaMallocManaged(&input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float));
-  memcpy(input_cuda,net->input_units, (in + 1) );
+  memcpy(input_cuda,net->input_units, (in + 1)  *sizeof(float));
  
   // this preprocessing stage is added to correct the bugs of wrong memcopy using two-dimensional net->inputweights
   for (int k = 0; k <= in; k++) {	
@@ -99,20 +100,47 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   }
 
   
+
+
+
+#ifdef PREF
+cudaStream_t stream1;
+cudaStream_t stream2;
+cudaStream_t stream3;
+cudaStream_t stream4;
+cudaStream_t stream5;
+cudaStreamCreate(&stream1);
+cudaStreamCreate(&stream2);
+cudaStreamCreate(&stream3);
+cudaStreamCreate(&stream4);
+cudaStreamCreate(&stream5);
+cudaMemPrefetchAsync(input_cuda,(in + 1) * sizeof(float), 0, stream1 );
+cudaMemPrefetchAsync(output_hidden_cuda,(hid + 1) * sizeof(float), 0, stream2 );
+cudaMemPrefetchAsync(input_hidden_cuda,(in + 1) * (hid + 1) * sizeof(float), 0, stream3 );
+cudaMemPrefetchAsync(hidden_partial_sum,num_blocks * WIDTH * sizeof(float), 0, stream4 );
+cudaStreamSynchronize(stream1);
+cudaStreamSynchronize(stream2);
+cudaStreamSynchronize(stream3);
+cudaStreamSynchronize(stream4);
 #endif
 
-#ifdef CPU
 
-  printf("Performing CPU computation\n");
-  bpnn_layerforward(net->input_units, net->hidden_units,net->input_weights, in, hid);
-
-#endif
-
-#ifdef GPU
  
-  printf("Performing GPU computation\n");
-  
-
+#ifdef PREF
+printf("Performing GPU computation\n");  
+for(int i = 0; i < ITERATIONS; i ++){
+  bpnn_layerforward_CUDA<<< grid, threads, 0, stream5 >>>(input_cuda,
+	                                          output_hidden_cuda,
+											  input_hidden_cuda,
+											  hidden_partial_sum,
+											  in,
+											  hid);
+ 
+  cudaDeviceSynchronize();
+}
+#else
+printf("Performing GPU computation\n");  
+for(int i = 0; i < ITERATIONS; i ++){
   bpnn_layerforward_CUDA<<< grid, threads >>>(input_cuda,
 	                                          output_hidden_cuda,
 											  input_hidden_cuda,
@@ -121,12 +149,11 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
 											  hid);
  
   cudaDeviceSynchronize();
+}
+
+#endif
+
   
-  cudaError_t error = cudaGetLastError();
-	if (error != cudaSuccess) {
-		printf("bpnn kernel error: %s\n", cudaGetErrorString(error));
-		exit(EXIT_FAILURE);
-	}
   
   // cudaMemcpy(partial_sum, hidden_partial_sum, num_blocks * WIDTH * sizeof(float), cudaMemcpyDeviceToHost);
      
@@ -138,35 +165,56 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
 	sum += net->input_weights[0][j];
 	net-> hidden_units[j] = float(1.0 / (1.0 + exp(-sum)));
   }
-  #endif
+
 
   bpnn_layerforward(net->hidden_units, net->output_units, net->hidden_weights, hid, out);
   bpnn_output_error(net->output_delta, net->target, net->output_units, out, &out_err);
   bpnn_hidden_error(net->hidden_delta, hid, net->output_delta, out, net->hidden_weights, net->hidden_units, &hid_err);  
   bpnn_adjust_weights(net->output_delta, out, net->hidden_units, hid, net->hidden_weights, net->hidden_prev_weights);
 
-#ifdef CPU
-
-  bpnn_adjust_weights(net->hidden_delta, hid, net->input_units, in, net->input_weights, net->input_prev_weights);
-
-#endif  
 
 
-#ifdef GPU
+
 
   cudaMallocManaged( &hidden_delta_cuda, (hid + 1) * sizeof(float));
-  memcpy(hidden_delta_cuda, net->hidden_delta,(hid + 1));
+  memcpy(hidden_delta_cuda, net->hidden_delta,(hid + 1)* sizeof(float));
 
 
-  bpnn_adjust_weights_cuda<<< grid, threads >>>(hidden_delta_cuda,  
-												hid, 
-												input_cuda, 
-												in,
-												input_hidden_cuda, 
-												input_prev_weights_cuda
-												);
-  cudaDeviceSynchronize();
-  memcpy(net->input_units, input_cuda, (in + 1) );
+  #ifdef PREF
+  cudaMemPrefetchAsync(input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float), 0, stream1 );
+  cudaMemPrefetchAsync(hidden_delta_cuda,(hid + 1) * sizeof(float), 0, stream2 );
+  // cudaMemPrefetchAsync(input_cuda,(in + 1) * sizeof(float), 0, stream3 );
+  // cudaMemPrefetchAsync(input_hidden_cuda,(in + 1) * (hid + 1) * sizeof(float), 0, stream4 );
+  cudaStreamSynchronize(stream1);
+  cudaStreamSynchronize(stream2);
+  // cudaStreamSynchronize(stream3);
+  // cudaStreamSynchronize(stream4);
+    for(int i = 0; i < ITERATIONS; i ++){
+      bpnn_adjust_weights_cuda<<< grid, threads, 0, stream5 >>>(hidden_delta_cuda,  
+                            hid, 
+                            input_cuda, 
+                            in,
+                            input_hidden_cuda, 
+                            input_prev_weights_cuda
+                            );
+      cudaDeviceSynchronize();
+                          }
+
+  #else
+
+    for(int i = 0; i < ITERATIONS; i ++){
+    bpnn_adjust_weights_cuda<<< grid, threads >>>(hidden_delta_cuda,  
+                          hid, 
+                          input_cuda, 
+                          in,
+                          input_hidden_cuda, 
+                          input_prev_weights_cuda
+                          );
+    cudaDeviceSynchronize();
+                        }
+  #endif 
+          
+  memcpy(net->input_units, input_cuda, (in + 1)  * sizeof(float));
     
   cudaFree(input_cuda);
   cudaFree(output_hidden_cuda);
@@ -174,9 +222,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaFree(hidden_partial_sum);
   cudaFree(input_prev_weights_cuda);
   cudaFree(hidden_delta_cuda);
-  
 
-#endif   
   
   
   

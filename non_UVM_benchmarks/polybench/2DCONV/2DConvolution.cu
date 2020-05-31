@@ -139,8 +139,10 @@ void convolution2DCuda(DATA_TYPE* A, DATA_TYPE* B, DATA_TYPE* B_outputFromGpu)
 	dim3 block(DIM_THREAD_BLOCK_X, DIM_THREAD_BLOCK_Y);
 	dim3 grid((size_t)ceil( ((float)NI) / ((float)block.x) ), (size_t)ceil( ((float)NJ) / ((float)block.y)) );
 	t_start = rtclock();
+	for (int i = 0; i < 1; i++){
 	Convolution2D_kernel<<<grid,block>>>(A_gpu,B_gpu);
 	cudaDeviceSynchronize();
+	}
 	t_end = rtclock();
 	fprintf(stdout, "GPU Runtime: %0.6lfs\n", t_end - t_start);//);
 
