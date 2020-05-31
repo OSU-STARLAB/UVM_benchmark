@@ -8,4 +8,4 @@ run:
 	./svm_non_uvm  5 1024 93
 
 clean:
-	rm svm_non_uvm
+	rm -f svm_non_uvm

@@ -8,4 +8,4 @@ run:
 	./svm_uvm  5 1024 93
 
 clean:
-	rm svm_uvm
+	rm -f svm_uvm

@@ -5,4 +5,4 @@ knn: knn_cuda.cu
 	$(NVCC) ${NVCCCFLAGS} -o $@ $<
 
 clean:
-	rm knn
+	rm -f knn

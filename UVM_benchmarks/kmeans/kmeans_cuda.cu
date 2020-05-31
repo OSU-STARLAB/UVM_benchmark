@@ -217,7 +217,7 @@ void print_results(int *group, float *mu_x, float *mu_y, int n, int k,char* arg)
   FILE *fp;
   int i;
   std::string str(arg),str1,str2;
-  str = "results/cuda/" + str;
+  str = "result/cuda/" + str;
 
    str1 = str + "_group_members.txt";
   fp = fopen(str1.c_str(), "w");

@@ -9,4 +9,4 @@ all:
 run:
 	./CNN
 clean:
-	rm CNN
+	rm -f CNN

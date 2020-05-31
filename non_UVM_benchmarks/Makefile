@@ -7,12 +7,10 @@ all:
 	cd logistic-regression; make;
 	cd SVM;	make;
 	cd rodinia/backprop;	make;
-	cd rodinia/cfd; make;
 	cd rodinia/dwt2d;	make;
 	cd rodinia/gaussian;	make;
 	cd rodinia/hotspot; make;
 	cd rodinia/hotspot3D;	make;
-	cd rodinia/huffman; make;
 	cd rodinia/nn;	make;
 	cd rodinia/nw;	make;
 	cd rodinia/particlefilter; make;
@@ -31,12 +29,10 @@ clean:
 	cd logistic-regression; make clean; rm  -f   *.csv;
 	cd SVM;	make clean; rm  -f   *.csv;
 	cd rodinia/backprop;	make clean; rm  -f   *.csv;
-	cd rodinia/cfd; make clean; rm  -f   *.csv;
 	cd rodinia/dwt2d;	make clean; rm  -f   *.csv;
 	cd rodinia/gaussian;	make clean; rm  -f   *.csv;
 	cd rodinia/hotspot; make clean; rm  -f   *.csv;
 	cd rodinia/hotspot3D;	make clean; rm  -f   *.csv;
-	cd rodinia/huffman; make clean; rm  -f   *.csv;
 	cd rodinia/nn;	make clean; rm  -f   *.csv;
 	cd rodinia/nw;	make clean; rm  -f   *.csv;
 	cd rodinia/particlefilter; make clean; rm  -f   *.csv;
@@ -70,12 +66,10 @@ get_permission:
 	cd logistic-regression; chmod +x run;
 	cd SVM;	chmod +x run;
 	cd rodinia/backprop;	chmod +x run;
-	cd rodinia/cfd; chmod +x run;
 	cd rodinia/dwt2d;	chmod +x run;
 	cd rodinia/gaussian;	chmod +x run;
 	cd rodinia/hotspot; chmod +x run;
 	cd rodinia/hotspot3D;	chmod +x run;
-	cd rodinia/huffman; chmod +x run;
 	cd rodinia/nn;	chmod +x run;
 	cd rodinia/nw;	chmod +x run;
 	cd rodinia/particlefilter; chmod +x run;
