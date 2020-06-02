@@ -108,3 +108,7 @@ non_UVM_benchmarks/rodinia/streamcluster/sc_gpu
 test
 non_UVM_benchmarks/logistic-regression/gpu_exec
 non_UVM_benchmarks/knn/knn
+UVM_benchmarks/knn/knn
+non_UVM_benchmarks/SVM/svm_non_uvm
+non_UVM_benchmarks/kmeans/kmeans_cuda
+non_UVM_benchmarks/kmeans/kmeans_standard

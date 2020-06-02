@@ -8,7 +8,7 @@ CC_FLAGS = -g  -O2 -I$(CUDA_DIR)/include
 NVCC = $(CUDA_DIR)/bin/nvcc
 NVCC_FLAGS = -I$(CUDA_DIR)/include
 
-DEF := -DPREF
+# DEF := -DPREF
 # 'make dbg=1' enables NVCC debugging
 ifeq ($(dbg),1)
 	NVCC_FLAGS += -g -O0

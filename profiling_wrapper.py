@@ -25,6 +25,7 @@ output_sub_path = " ../../../results/"
 
 print_general_options = "--csv  --track-memory-allocations off --profile-child-processes "
 
+print_pcie_options = "--track-memory-allocations off --profile-child-processes "
 # metric_list = metrics[24]
 # metric_list = metrics[8] + metrics[12]
 metric_list = metrics[75]
@@ -146,6 +147,40 @@ def profile_PCIe():
                         command = "cd " + path + "; nvprof " + print_options + print_file + output_sub_path + time_str + "/"  + subfolder + "_%p_summary_UVM.csv" + " " + " ./run"
                     else:
                         command = "cd " + path + "; nvprof " + print_options + print_file+ output_sub_path + time_str + "/"  + subfolder + "_%p_summary_non_UVM.csv" + " " + " ./run"
+                    print(command)
+                    os.system(command)
+
+
+def profile_PCIe_UVM():
+    for UVM_flag in [True]:
+        base_path = "UVM_benchmarks/"
+        if not UVM_flag:
+            base_path = "non_UVM_benchmarks/"
+        for i, folder in enumerate(folders):
+            if folder != "rodinia" and folder != "polybench":
+                path = base_path + folder + "/"
+                if UVM_flag:
+                    command = "cd " + path + "; nvprof " + print_pcie_options + print_file + output_path + time_str + "/"  + folder + "_%p_summary_UVM"   + " " + " ./run"
+                else:
+                    command = "cd " + path + "; nvprof " + print_pcie_options + print_file + output_path + time_str + "/"  + folder + "_%p_summary_non_UVM"   + " " + " ./run"
+                print(command)
+                os.system(command)
+            elif folder == "polybench":
+                for j, subfolder in enumerate(subfolders2):
+                    path = base_path + folder + "/" + subfolder
+                    if UVM_flag:
+                        command = "cd " + path + "; nvprof " + print_pcie_options + print_file+ output_sub_path + time_str + "/"  + subfolder + "_%p_summary_UVM" + " " + " ./run"
+                    else:
+                        command = "cd " + path + "; nvprof " + print_pcie_options + print_file+ output_sub_path + time_str + "/"  + subfolder + "_%p_summary_non_UVM" + " " + " ./run"
+                    print(command)
+                    os.system(command)
+            else:
+                for j, subfolder in enumerate(subfolders):
+                    path = base_path + folder + "/" + subfolder
+                    if UVM_flag:
+                        command = "cd " + path + "; nvprof " + print_pcie_options + print_file + output_sub_path + time_str + "/"  + subfolder + "_%p_summary_UVM" + " " + " ./run"
+                    else:
+                        command = "cd " + path + "; nvprof " + print_pcie_options + print_file+ output_sub_path + time_str + "/"  + subfolder + "_%p_summary_non_UVM" + " " + " ./run"
                     print(command)
                     os.system(command)
 

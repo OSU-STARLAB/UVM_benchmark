@@ -1,5 +1,5 @@
 #include "Helper.h"
-#include "ArffImporter.h"
+#include "ArffImporter.cuh"
 
 #include <cublas_v2.h>
 
@@ -11,7 +11,8 @@ Node initNode( unsigned int numFeatures )
 {
     Node node;
     node.numFeatures = numFeatures;
-    node.weights = (float*) malloc( numFeatures * sizeof( float ) );
+    // node.weights = (float*) malloc( numFeatures * sizeof( float ) );
+    cudaMallocHost((void**)&node.weights , numFeatures * sizeof( float ))   ;
     memset( node.weights, 0, numFeatures * sizeof( float ) );
 
     return node;
@@ -205,7 +206,7 @@ int main()
     cudaFree( dWeightArr );
     cudaFree( dCostArr );
     cudaFree( dFeaCostProdArr );
-    free( node.weights );
+    cudaFree( node.weights );
 
     return 0;
 }

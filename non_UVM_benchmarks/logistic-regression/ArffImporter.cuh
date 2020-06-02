@@ -1,6 +1,6 @@
 
-#ifndef _ARFF_IMPORTER_H_
-#define _ARFF_IMPORTER_H_
+#ifndef _ARFF_IMPORTER_CUH_
+#define _ARFF_IMPORTER_CUH_
 
 
 #include "BasicDataStructures.h"

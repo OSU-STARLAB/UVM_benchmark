@@ -2,7 +2,7 @@ include ../../../common/make.config
 
 CC := $(CUDA_DIR)/bin/nvcc
 INCLUDE := $(CUDA_DIR)/include
-DEF := -DPREF
+# DEF := -DPREF
 
 SRC = pathfinder.cu
 

@@ -1,5 +1,5 @@
 
-#include "ArffImporter.h"
+#include "ArffImporter.cuh"
 
 
 using namespace std;
@@ -12,9 +12,10 @@ ArffImporter::ArffImporter()
 ArffImporter::~ArffImporter()
 {
     free( featureMat );
-    free( featureMatTrans );
-    free( classArr );
-
+    // free( featureMatTrans );
+    cudaFree(featureMatTrans);
+    // free( classArr );
+    cudaFree( classArr );
     for (char* classAttr : classVec) free( classAttr );
     classVec.clear();
 
@@ -31,10 +32,13 @@ void ArffImporter::BuildFeatureMatrix()
     numFeatures++;
     featureMat =
         (float*) malloc( numInstances * numFeatures * sizeof( float ) );
-    featureMatTrans =
-        (float*) malloc( numInstances * numFeatures * sizeof( float ) );
-    classArr =
-        (unsigned short*) malloc( numInstances * sizeof( unsigned short ) );
+    // featureMatTrans =
+    //     (float*) malloc( numInstances * numFeatures * sizeof( float ) );
+    cudaMallocHost((void**)&featureMatTrans, numInstances * numFeatures * sizeof( float ))   ;
+    // classArr =
+    //     (unsigned short*) malloc( numInstances * sizeof( unsigned short ) );
+
+    cudaMallocHost((void**)&classArr, numInstances * sizeof( unsigned short ));
     for (unsigned int i = 0; i < numInstances; i++)
     {
         float* offset = featureMat + i * numFeatures;

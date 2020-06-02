@@ -81,8 +81,12 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   dim3  grid( 1 , num_blocks);
   dim3  threads(16 , 16);
   
-  input_weights_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));
-  input_weights_prev_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));
+  // input_weights_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));
+  cudaMallocHost((void **) &input_weights_one_dim, (in + 1)* (hid + 1) * sizeof(float));
+  // input_weights_prev_one_dim = (float *) malloc((in + 1)* (hid + 1) * sizeof(float));
+  cudaMallocHost((void **) &input_weights_prev_one_dim, (in + 1)* (hid + 1) * sizeof(float));
+
+
   partial_sum = (float *) malloc(num_blocks * WIDTH * sizeof(float));
  
   // this preprocessing stage is added to correct the bugs of wrong memcopy using two-dimensional net->inputweights
@@ -189,8 +193,9 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaFree(hidden_delta_cuda);
   
   free(partial_sum);
-  free(input_weights_one_dim);
-  free(input_weights_prev_one_dim);
+  cudaFree(input_weights_one_dim);
+  // free(input_weights_prev_one_dim);
+  cudaFree(input_weights_prev_one_dim);
 
 #endif   
   

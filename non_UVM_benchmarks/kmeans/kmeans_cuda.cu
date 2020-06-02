@@ -91,14 +91,14 @@ void kmeans(int nreps, int n, int k,
   }
 }
 
-void read_data(float **x, float **y, float **mu_x, float **mu_y, int *n, int *k,char* arg);
+// void read_data(float **x, float **y, float **mu_x, float **mu_y, int *n, int *k,char* arg);
 void print_results(int *group, float *mu_x, float *mu_y, int n, int k,char* argv);
 
 int main(int argc,char* argv[]){
 
   /* cpu variables */
-  int n; /* number of points */
-  int k; /* number of clusters */
+  int n = 0; /* number of points */
+  int k = 0; /* number of clusters */
   int *group;
   float *x = NULL, *y = NULL, *mu_x = NULL, *mu_y = NULL;
 
@@ -107,7 +107,48 @@ int main(int argc,char* argv[]){
   float *x_d, *y_d, *mu_x_d, *mu_y_d, *sum_x_d, *sum_y_d, *dst_d;
 
   /* read data from files on cpu */
-  read_data(&x, &y, &mu_x, &mu_y, &n, &k,argv[2]);
+  // read_data(&x, &y, &mu_x, &mu_y, &n, &k,argv[2]);
+  FILE *fp;
+  char buf[64];
+  fp = fopen(argv[2], "r");
+  while(fgets(buf, 64, fp) != NULL){
+    n += 1;
+  }
+  fclose(fp);
+  cudaMallocHost((void**)&x, (n)*sizeof(float));
+  cudaMallocHost((void**)&y, (n)*sizeof(float));
+  int temp = 0;
+  fp = fopen(argv[2], "r");
+  while(fgets(buf, 64, fp) != NULL){
+    temp +=1;
+    std::istringstream line_stream(buf);
+    float x1,y1;
+    line_stream >> x1 >> y1;
+    x[temp - 1] = x1;
+    y[temp - 1] = y1;
+  }
+  fclose(fp);
+
+  fp = fopen("../../data/kmeans/initCoord.txt", "r");
+  while(fgets(buf, 64, fp) != NULL){
+    k += 1;
+  }
+  fclose(fp);
+  cudaMallocHost((void**)&mu_x, (k)*sizeof(float));
+  cudaMallocHost((void**)&mu_y, (k)*sizeof(float));
+
+  fp = fopen("../../data/kmeans/initCoord.txt", "r");
+  temp = 0;
+  while(fgets(buf, 64, fp) != NULL){
+    temp += 1; 
+    std::istringstream line_stream(buf);
+    float x1,y1;
+    line_stream >> x1 >> y1;
+    mu_x[temp - 1] = x1;
+    mu_y[temp - 1] = y1;
+  }
+  fclose(fp);
+
 
   /* allocate cpu memory */
   group = (int*) malloc(n*sizeof(int));
@@ -152,10 +193,15 @@ gpu_time_used = duration.count();
   print_results(group, mu_x, mu_y, n, k,argv[3]);
 
 
-  free(x);
-  free(y);
-  free(mu_x);
-  free(mu_y);
+  // free(x);
+  // free(y);
+  // free(mu_x);
+  // free(mu_y);
+  cudaFree(x);
+  cudaFree(y);
+  cudaFree(mu_x);
+  cudaFree(mu_y);
+
   free(group);
 
   CUDA_CALL(cudaFree(x_d));
@@ -172,40 +218,69 @@ gpu_time_used = duration.count();
   return 0;
 }
 
-void read_data(float **x, float **y, float **mu_x, float **mu_y, int *n, int *k,char* arg){
-  FILE *fp;
-  char buf[64];
+// void read_data(float **x, float **y, float **mu_x, float **mu_y, int *n, int *k,char* arg){
+//   FILE *fp;
+//   char buf[64];
 
-  *n = 0;
-  fp = fopen(arg, "r");
+//   *n = 0;
+//   fp = fopen(arg, "r");
 
-  while(fgets(buf, 64, fp) != NULL){
-    *n += 1;
-    *x = (float*) realloc(*x, (*n)*sizeof(float));
-    *y = (float*) realloc(*y, (*n)*sizeof(float));
-    std::istringstream line_stream(buf);
-    float x1,y1;
-    line_stream >> x1 >> y1;
-    (*x)[*n - 1] = x1;
-    (*y)[*n - 1] = y1;
-  }
-  fclose(fp);
-
+//   while(fgets(buf, 64, fp) != NULL){
+//     *n += 1;
+//     // *x = (float*) realloc(*x, (*n)*sizeof(float));
+//     // *y = (float*) realloc(*y, (*n)*sizeof(float));
+//     // std::istringstream line_stream(buf);
+//     // float x1,y1;
+//     // line_stream >> x1 >> y1;
+//     // (*x)[*n - 1] = x1;
+//     // (*y)[*n - 1] = y1;
+//   }
+//   fclose(fp);
+//   // *x = (float*) realloc(*x, (*n)*sizeof(float));
+//   // *y = (float*) realloc(*y, (*n)*sizeof(float));
+//   cudaMallocHost((void**)&x, (*n)*sizeof(float *));
+//   cudaMallocHost((void**)&y, (*n)*sizeof(float *));
+//   int temp = 0;
+//   fp = fopen(arg, "r");
+//   while(fgets(buf, 64, fp) != NULL){
+//     temp +=1;
+//     std::istringstream line_stream(buf);
+//     float x1,y1;
+//     line_stream >> x1 >> y1;
+//     (*x)[temp - 1] = x1;
+//     (*y)[temp - 1] = y1;
+//   }
+//   fclose(fp);
   
-  *k = 0;
-  fp = fopen("../../data/kmeans/initCoord.txt", "r");
-  while(fgets(buf, 64, fp) != NULL){
-    *k += 1;
-    *mu_x = (float*) realloc(*mu_x, (*k)*sizeof(float));
-    *mu_y = (float*) realloc(*mu_y, (*k)*sizeof(float));
-    std::istringstream line_stream(buf);
-    float x1,y1;
-    line_stream >> x1 >> y1;
-    (*mu_x)[*k - 1] = x1;
-    (*mu_y)[*k - 1] = x1;
-  }
-  fclose(fp);
-}
+  
+//   *k = 0;
+//   fp = fopen("../../data/kmeans/initCoord.txt", "r");
+//   while(fgets(buf, 64, fp) != NULL){
+//     *k += 1;
+//     // *mu_x = (float*) realloc(*mu_x, (*k)*sizeof(float));
+//     // *mu_y = (float*) realloc(*mu_y, (*k)*sizeof(float));
+//     // std::istringstream line_stream(buf);
+//     // float x1,y1;
+//     // line_stream >> x1 >> y1;
+//     // (*mu_x)[*k - 1] = x1;
+//     // (*mu_y)[*k - 1] = x1;
+//   }
+//   fclose(fp);
+//   cudaMallocHost((void**)&mu_x, (*k)*sizeof(float *));
+//   cudaMallocHost((void**)&mu_x, (*k)*sizeof(float *));
+//   fp = fopen("../../data/kmeans/initCoord.txt", "r");
+//   temp = 0;
+//   while(fgets(buf, 64, fp) != NULL){
+//     std::istringstream line_stream(buf);
+//     float x1,y1;
+//     line_stream >> x1 >> y1;
+//     (*mu_x)[temp - 1] = x1;
+//     (*mu_y)[temp - 1] = x1;
+//   }
+//   fclose(fp);
+
+
+// }
 
 
 void print_results(int *group, float *mu_x, float *mu_y, int n, int k,char* arg){
