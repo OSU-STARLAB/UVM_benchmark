@@ -688,6 +688,7 @@ void particleFilter(unsigned char * I, int IszX, int IszY, int Nfr, int * seed, 
     // double * u = (double *) malloc(sizeof (double) *Nparticles);
     // int * seed_GPU;
     double* partial_sums;
+    printf("count 1 is %d\n", countOnes);
 
     //CUDA memory allocation
     check_error(cudaMallocManaged(&arrayX_GPU, sizeof (double) *Nparticles));

@@ -8,7 +8,7 @@
 #define DEVICE 0
 #define HALO 1 // halo width along one direction when advancing to the next iteration
 
-#define BENCH_PRINT
+// #define BENCH_PRINT
 
 void run(int argc, char** argv);
 
@@ -263,6 +263,7 @@ void run(int argc, char** argv)
     int *gpuWall, *gpuResult[2];
     int size = rows*cols;
 
+    printf("col is %d, size is %d\n", cols, size);
     // cudaMalloc((void**)&gpuResult[0], sizeof(int)*cols);
     // cudaMalloc((void**)&gpuResult[1], sizeof(int)*cols);
     cudaMallocManaged(&gpuResult[0], sizeof(int)*cols);
@@ -273,12 +274,21 @@ void run(int argc, char** argv)
     cudaMallocManaged(&gpuWall, sizeof(int)*(size-cols));
     // cudaMemcpy(gpuWall, data+cols, sizeof(int)*(size-cols), cudaMemcpyHostToDevice);
     memcpy(gpuWall, data+cols, sizeof(int)*(size-cols));
+    cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+    float elapsed_time;
+    cudaEventRecord(start, 0);
 
     int final_ret;
     for (int i = 0; i < 1; i ++)
      final_ret = calc_path(gpuWall, gpuResult, rows, cols, \
 	 pyramid_height, blockCols, borderCols);
-
+     cudaEventRecord(stop, 0);
+     cudaEventSynchronize(stop);
+     cudaEventElapsedTime(&elapsed_time, start, stop);
+ 
+     printf("\nTime taken is %lf seconds.\n", (elapsed_time)/1000);
     // cudaMemcpy(result, gpuResult[final_ret], sizeof(int)*cols, cudaMemcpyDeviceToHost);
 
 

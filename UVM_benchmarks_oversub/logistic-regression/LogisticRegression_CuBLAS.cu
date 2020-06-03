@@ -103,9 +103,15 @@ int main() {
   float updateWParam = -LEARNING_RATE / (float)numInstances;
   unsigned int iter = 0;
 
-  time_t start, end;
-  float dif;
-  time(&start);
+  // time_t start, end;
+  // float dif;
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  float elapsed_time;
+
+  // time(&start);
+  cudaEventRecord(start, 0);
 
   printf("\nStart gradient descent...\n");
 
@@ -136,9 +142,13 @@ int main() {
   //                           numFeatures * sizeof(float),
   //                           cudaMemcpyDeviceToHost));
 
-  time(&end);
-  dif = difftime(end, start);
-  printf("Time taken is %.2lf seconds.\n", dif);
+  // time(&end);
+  cudaEventRecord(stop, 0);
+
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&elapsed_time, start, stop);
+
+  printf("Time taken is %lf seconds.\n", elapsed_time/1000);
 
   printf("Updating weights completed, weight: %f\n", node.weights[0]);
 

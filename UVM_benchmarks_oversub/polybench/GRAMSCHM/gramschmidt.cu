@@ -24,12 +24,12 @@
 #define GPU_DEVICE 0
 
 /* Problem size */
-#define M 2048
-#define N 2048
+#define M 2048 * 6
+#define N 2048 * 6 
 
 /* Thread block dimensions */
 #define DIM_THREAD_BLOCK_X 256
-#define DIM_THREAD_BLOCK_Y 1
+#define DIM_THREAD_BLOCK_Y 64
 
 /* Can switch DATA_TYPE between float and double */
 typedef float DATA_TYPE;

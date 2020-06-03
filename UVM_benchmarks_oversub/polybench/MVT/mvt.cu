@@ -23,7 +23,7 @@
 #define GPU_DEVICE 0
 
 /* Problem size */
-#define N 4096
+#define N 4096 * 4
 
 /* Thread block dimensions */
 #define DIM_THREAD_BLOCK_X 256

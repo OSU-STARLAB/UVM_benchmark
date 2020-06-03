@@ -24,8 +24,8 @@
 #define GPU_DEVICE 0
 
 /* Problem size */
-#define NI 4096
-#define NJ 4096
+#define NI 4096 *4
+#define NJ 4096 * 4
 
 /* Thread block dimensions */
 #define DIM_THREAD_BLOCK_X 32

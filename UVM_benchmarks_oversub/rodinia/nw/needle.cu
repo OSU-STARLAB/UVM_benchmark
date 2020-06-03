@@ -140,7 +140,10 @@ void runTest( int argc, char** argv)
 	for( int j = 1; j< max_cols ; j++)
        input_itemsets[j] = -j * penalty;
 
-
+	   cudaEvent_t start, stop;
+	   cudaEventCreate(&start);
+	   cudaEventCreate(&stop);
+	   float elapsed_time;
 	// cudaMalloc((void**)& referrence_cuda, sizeof(int)*size);
 	// cudaMalloc((void**)& matrix_cuda, sizeof(int)*size);
 	
@@ -150,7 +153,7 @@ void runTest( int argc, char** argv)
     dim3 dimGrid;
 	dim3 dimBlock(BLOCK_SIZE, 1);
 	int block_width = ( max_cols - 1 )/BLOCK_SIZE;
-
+    cudaEventRecord(start, 0);
 	printf("Processing top-left matrix\n");
 	//process top-left matrix
 	for( int i = 1 ; i <= block_width ; i++){
@@ -169,6 +172,11 @@ void runTest( int argc, char** argv)
 	}
 
 
+	cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsed_time, start, stop);
+
+    printf("\nTime taken is %lf seconds.\n", (elapsed_time)/1000);
     // cudaMemcpy(output_itemsets, matrix_cuda, sizeof(int) * size, cudaMemcpyDeviceToHost);
 	
 //#define TRACEBACK

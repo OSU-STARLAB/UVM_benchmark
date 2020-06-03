@@ -6,8 +6,8 @@
 
 using namespace std;
 
-static const int WIDTH  = 4;
-static const int HEIGHT = 4;
+static const int WIDTH  = 10240;
+static const int HEIGHT = 10240;
 
 static void showCheckerBoard(Bmp &bmp)
 {
@@ -180,7 +180,7 @@ int main()
    }
 */
    string errMsg;
-   string fileName = "4.bmp";
+   string fileName = "10240.bmp";
 
    if(!image.write(fileName, errMsg))
    {

@@ -388,15 +388,25 @@ void run(int argc, char **argv) {
   cudaMallocManaged(&MatrixPower, sizeof(float) * size);
   //   cudaMemcpy(MatrixPower, FilesavingPower, sizeof(float) * size,
   //              cudaMemcpyHostToDevice);
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  float elapsed_time;
+
   printf("Start computing the transient temperature\n");
   int ret= 0;
-
+  cudaEventRecord(start, 0);
   for (int i = 0; i < 1; i++){
   ret = compute_tran_temp(MatrixPower, MatrixTemp, grid_cols, grid_rows,
                               total_iterations, pyramid_height, blockCols,
                               blockRows, borderCols, borderRows);
   printf("Ending simulation\n");
   }
+  cudaEventRecord(stop, 0);
+  cudaEventSynchronize(stop);
+  cudaEventElapsedTime(&elapsed_time, start, stop);
+
+  printf("\nTime taken is %lf seconds.\n", (elapsed_time)/1000);
   //   cudaMemcpy(MatrixOut, MatrixTemp[ret], sizeof(float) * size,
   //              cudaMemcpyDeviceToHost);
 

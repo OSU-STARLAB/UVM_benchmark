@@ -144,7 +144,12 @@ runTest( int argc, char** argv)
 
     for (int k = 0;  k < size_I; k++ ) {
 		J_cuda[k] = (float)exp(I[k]) ;
-    }
+	}
+	cudaEvent_t start, stop;
+    cudaEventCreate(&start);
+    cudaEventCreate(&stop);
+	float elapsed_time;
+	cudaEventRecord(start, 0);
 	printf("Start the SRAD main loop\n");
  for (iter=0; iter< niter; iter++){     
 		sum=0; sum2=0;
@@ -236,7 +241,13 @@ runTest( int argc, char** argv)
 #endif   
 }
 
-    cudaDeviceSynchronize();
+	cudaDeviceSynchronize();
+	
+	cudaEventRecord(stop, 0);
+    cudaEventSynchronize(stop);
+    cudaEventElapsedTime(&elapsed_time, start, stop);
+
+    printf("\nTime taken is %lf seconds.\n", (elapsed_time)/1000);
 
 #ifdef OUTPUT
     //Printing output	

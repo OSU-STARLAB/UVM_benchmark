@@ -1,9 +1,9 @@
 #ifndef _ORDERGRAPH_KERNEL_H_
 #define _ORDERGRAPH_KERNEL_H_
-#include "data45.cu"
+#include "data50.cu"
 #include <stdio.h>
 ;
-char name[20] = "45.out";
+char name[20] = "50.out";
 
 __device__ void Dincr(int *bit, int n);
 __device__ void DincrS(int *bit, int n);

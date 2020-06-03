@@ -24,13 +24,13 @@
 #define PERCENT_DIFF_ERROR_THRESHOLD 0.05
 
 /* Problem size */
-#define NI 512
-#define NJ 512
-#define NK 512
+#define NI 512 * 25
+#define NJ 512 * 25
+#define NK 512 * 25
 
 /* Thread block dimensions */
 #define DIM_THREAD_BLOCK_X 32
-#define DIM_THREAD_BLOCK_Y 8
+#define DIM_THREAD_BLOCK_Y 32
 
 /* Declared constant values for ALPHA and BETA (same as values in PolyBench 2.0) */
 #define ALPHA 32412.0f

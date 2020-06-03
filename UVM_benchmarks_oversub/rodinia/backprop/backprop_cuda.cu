@@ -66,6 +66,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   in = net->input_n;
   hid = net->hidden_n;
   out = net->output_n;   
+  // printf("%d, %d, %d", in, hid, out);
    
   int m = 0;
   float *input_hidden_cuda;
@@ -83,11 +84,11 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   dim3  threads(16 , 16);
 
 
-  cudaMallocManaged(&input_cuda, (in + 1) * sizeof(float));
-  cudaMallocManaged(&output_hidden_cuda, (hid + 1) * sizeof(float));
-  cudaMallocManaged(&input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float));
-  cudaMallocManaged(&hidden_partial_sum, num_blocks * WIDTH * sizeof(float));
-  cudaMallocManaged(&input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float));
+  cudaMallocManaged(&input_cuda, (in + 1) * sizeof(float)); //4
+  cudaMallocManaged(&output_hidden_cuda, (hid + 1) * sizeof(float));//
+  cudaMallocManaged(&input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float)); //68
+  cudaMallocManaged(&hidden_partial_sum, num_blocks * WIDTH * sizeof(float)); //4
+  cudaMallocManaged(&input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float)); //68
   memcpy(input_cuda,net->input_units, (in + 1)  *sizeof(float));
  
   // this preprocessing stage is added to correct the bugs of wrong memcopy using two-dimensional net->inputweights
@@ -99,9 +100,15 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
     }
   }
 
-  
+  cudaEvent_t start, stop;
+  cudaEventCreate(&start);
+  cudaEventCreate(&stop);
+  float elapsed_time;
 
-
+  cudaEvent_t start1, stop1;
+  cudaEventCreate(&start1);
+  cudaEventCreate(&stop1);
+  float elapsed_time1;
 
 #ifdef PREF
 cudaStream_t stream1;
@@ -139,6 +146,7 @@ for(int i = 0; i < ITERATIONS; i ++){
   cudaDeviceSynchronize();
 }
 #else
+cudaEventRecord(start, 0);
 printf("Performing GPU computation\n");  
 for(int i = 0; i < ITERATIONS; i ++){
   bpnn_layerforward_CUDA<<< grid, threads >>>(input_cuda,
@@ -150,7 +158,9 @@ for(int i = 0; i < ITERATIONS; i ++){
  
   cudaDeviceSynchronize();
 }
-
+cudaEventRecord(stop, 0);
+cudaEventSynchronize(stop);
+cudaEventElapsedTime(&elapsed_time, start, stop);
 #endif
 
   
@@ -201,7 +211,7 @@ for(int i = 0; i < ITERATIONS; i ++){
                           }
 
   #else
-
+  cudaEventRecord(start1, 0);
     for(int i = 0; i < ITERATIONS; i ++){
     bpnn_adjust_weights_cuda<<< grid, threads >>>(hidden_delta_cuda,  
                           hid, 
@@ -212,6 +222,12 @@ for(int i = 0; i < ITERATIONS; i ++){
                           );
     cudaDeviceSynchronize();
                         }
+    cudaEventRecord(stop1, 0);
+    cudaEventSynchronize(stop1);
+    cudaEventElapsedTime(&elapsed_time1, start1, stop1);
+
+    printf("Time taken is %lf seconds.\n", (elapsed_time1 + elapsed_time)/1000);
+
   #endif 
           
   memcpy(net->input_units, input_cuda, (in + 1)  * sizeof(float));

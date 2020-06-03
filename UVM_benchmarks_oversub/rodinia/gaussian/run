@@ -1,1 +1,1 @@
-./gaussian -f ../../../data/gaussian/matrix256.txt
+./gaussian -f ../../../data/gaussian/matrix4096.txt -q

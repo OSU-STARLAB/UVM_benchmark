@@ -1,1 +1,1 @@
-./sc_gpu 10 20 256 65536 65536 1000 none output.txt 1
+./sc_gpu 10 20 256 655360 655360 1000 none output.txt 1

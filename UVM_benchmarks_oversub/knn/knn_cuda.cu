@@ -499,8 +499,8 @@ int main(void) {
   float *query;         // Pointer to query point array
   float *dist, *dist_c; // Pointer to distance array
   int *ind, *ind_c;     // Pointer to index array
-  int ref_nb = 4096;    // Reference point number, max=65535
-  int query_nb = 4096;  // Query point number,     max=65535
+  int ref_nb = 8192;    // Reference point number, max=65535
+  int query_nb = 8192;  // Query point number,     max=65535
   int dim = 32;         // Dimension of points
   int k = 20;           // Nearest neighbors to consider
   int iterations = 100;
@@ -549,31 +549,31 @@ int main(void) {
   printf("Number of neighbors to consider : %4d\n", k);
   printf("Processing kNN search           :\n");
 
-  printf("On CPU: \n");
-  struct timeval tic;
-  gettimeofday(&tic, NULL);
-  for (i = 0; i < c_iterations; i++) {
-    knn_c(ref, ref_nb, query, query_nb, dim, k, dist_c, ind_c);
-  }
+  // printf("On CPU: \n");
+  // struct timeval tic;
+  // gettimeofday(&tic, NULL);
+  // for (i = 0; i < c_iterations; i++) {
+  //   knn_c(ref, ref_nb, query, query_nb, dim, k, dist_c, ind_c);
+  // }
 
-  for (int i = 0; i < query_nb * k; ++i) {
-    if (fabs(dist_c[i] - knn_dist[i]) <= precision) {
-      nb_correct_precisions++;
-    }
-    if (ind_c[i] == knn_index[i]) {
-      nb_correct_indexes++;
-    }
-  }
+  // for (int i = 0; i < query_nb * k; ++i) {
+  //   if (fabs(dist_c[i] - knn_dist[i]) <= precision) {
+  //     nb_correct_precisions++;
+  //   }
+  //   if (ind_c[i] == knn_index[i]) {
+  //     nb_correct_indexes++;
+  //   }
+  // }
 
-  struct timeval toc;
-  gettimeofday(&toc, NULL);
-  elapsed_time = toc.tv_sec - tic.tv_sec;
-  elapsed_time += (toc.tv_usec - tic.tv_usec) / 1000000.;
-  float precision_accuracy = nb_correct_precisions / ((float)query_nb * k);
-  float index_accuracy = nb_correct_indexes / ((float)query_nb * k);
-  printf("%f, %f\n", precision_accuracy, index_accuracy);
-  printf(" done in %f s for %d iterations (%f s by iteration)\n", elapsed_time,
-         c_iterations, elapsed_time / (c_iterations));
+  // struct timeval toc;
+  // gettimeofday(&toc, NULL);
+  // elapsed_time = toc.tv_sec - tic.tv_sec;
+  // elapsed_time += (toc.tv_usec - tic.tv_usec) / 1000000.;
+  // float precision_accuracy = nb_correct_precisions / ((float)query_nb * k);
+  // float index_accuracy = nb_correct_indexes / ((float)query_nb * k);
+  // printf("%f, %f\n", precision_accuracy, index_accuracy);
+  // printf(" done in %f s for %d iterations (%f s by iteration)\n", elapsed_time,
+  //        c_iterations, elapsed_time / (c_iterations));
   printf("on GPU: \n");
 
   // Call kNN search CUDA
@@ -593,8 +593,8 @@ int main(void) {
   cudaEventRecord(stop, 0);
   cudaEventSynchronize(stop);
   cudaEventElapsedTime(&elapsed_time, start, stop);
-  precision_accuracy = nb_correct_precisions / ((float)query_nb * k);
-  index_accuracy = nb_correct_indexes / ((float)query_nb * k);
+  float precision_accuracy = nb_correct_precisions / ((float)query_nb * k);
+  float index_accuracy = nb_correct_indexes / ((float)query_nb * k);
   printf("%f, %f\n", precision_accuracy, index_accuracy);
   printf(" done in %f s for %d iterations (%f s by iteration)\n",
          elapsed_time / 1000, iterations, elapsed_time / (iterations * 1000));

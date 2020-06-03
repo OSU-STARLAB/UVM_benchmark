@@ -130,3 +130,14 @@ UVM_benchmarks_oversub/rodinia/particlefilter/particlefilter_float
 UVM_benchmarks_oversub/rodinia/particlefilter/particlefilter_naive
 UVM_benchmarks_oversub/rodinia/pathfinder/pathfinder
 UVM_benchmarks_oversub/rodinia/srad/srad
+data/dwt2d/inputGen/10240.bmp
+data/dwt2d/10240.bmp
+data/hotspot/temp_16384
+data/hotspot/power_16384
+data/hotspot/inputGen/power_16384
+data/hotspot/inputGen/temp_16384
+data/hotspot/inputGen/hotspotver
+data/hotspot/inputGen/hotspotex
+UVM_benchmarks_oversub/Memory_occupy/memory_occ
+data/hotspot3D/power_4096x16
+data/hotspot3D/temp_4096x16

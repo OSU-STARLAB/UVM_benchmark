@@ -23,11 +23,11 @@
 #define GPU_DEVICE 0
 
 /* Problem size */
-#define N 2048
-#define M 2048
+#define N 2048 * 4 
+#define M 2048 * 8
 
 /* Thread block dimensions */
-#define DIM_THREAD_BLOCK_X 32
+#define DIM_THREAD_BLOCK_X 64
 #define DIM_THREAD_BLOCK_Y 8
 
 /* Declared constant values for ALPHA and BETA (same as values in PolyBench 2.0) */
