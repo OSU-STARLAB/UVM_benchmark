@@ -28,15 +28,15 @@
 
 /* Thread block dimensions for kernel 1*/
 #define DIM_THREAD_BLOCK_KERNEL_1_X 256
-#define DIM_THREAD_BLOCK_KERNEL_1_Y 256
+#define DIM_THREAD_BLOCK_KERNEL_1_Y 1
 
 /* Thread block dimensions for kernel 2*/
-#define DIM_THREAD_BLOCK_KERNEL_2_X 32
-#define DIM_THREAD_BLOCK_KERNEL_2_Y 8
+#define DIM_THREAD_BLOCK_KERNEL_2_X 64
+#define DIM_THREAD_BLOCK_KERNEL_2_Y 32
 
 /* Thread block dimensions for kernel 3*/
 #define DIM_THREAD_BLOCK_KERNEL_3_X 256
-#define DIM_THREAD_BLOCK_KERNEL_3_Y 256
+#define DIM_THREAD_BLOCK_KERNEL_3_Y 1
 
 #define sqrt_of_array_cell(x,j) sqrt(x[j])
 
