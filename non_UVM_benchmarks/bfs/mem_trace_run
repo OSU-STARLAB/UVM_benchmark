@@ -1,0 +1,2 @@
+LD_PRELOAD=../../nvbit_release/tools/mem_printf/mem_printf.so ./main 5 <../../data/bfs/inputGen/graph16M.txt
+#./main 5 1000000 10000000

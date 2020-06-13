@@ -1,0 +1,1 @@
+LD_PRELOAD=../../../nvbit_release/tools/mem_printf/mem_printf.so  ./sc_gpu 10 20 256 65536 65536 1000 none output.txt 1

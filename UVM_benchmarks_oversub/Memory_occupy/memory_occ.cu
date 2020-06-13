@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     {
         // printf("size is %f\n", size);
         fprintf(stdout, "It is 110%% oversubscription mode\n");
-        float occupy_mem = 11  - size   +  size * 1.0/10.0 - 0.1;
+        float occupy_mem = 11  - size   +  size * 1.0/10.0 -0.1 ;
         GB = (unsigned) occupy_mem;
         float temp_MB = (occupy_mem -floor(occupy_mem)) *1024.0;
         MB = (unsigned) temp_MB;
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
     {
         printf("size is %f\n", size);
         fprintf(stdout, "It is 125%% oversubscription mode\n");
-        float occupy_mem = 11  - size   +  size * 1.0/4.0 - 0.1; 
+        float occupy_mem = 11  - size   +  size * 1.0/4.0 - 0.1  ; 
         GB = (unsigned) occupy_mem;
         float temp_MB = (occupy_mem -floor(occupy_mem)) *1024.0;
         MB = (unsigned) temp_MB;

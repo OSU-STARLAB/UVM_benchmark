@@ -141,3 +141,6 @@ data/hotspot/inputGen/hotspotex
 UVM_benchmarks_oversub/Memory_occupy/memory_occ
 data/hotspot3D/power_4096x16
 data/hotspot3D/temp_4096x16
+nvbit_release/
+trace/
+*_trace

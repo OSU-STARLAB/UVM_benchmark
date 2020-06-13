@@ -1,0 +1,1 @@
+LD_PRELOAD=../../../nvbit_release/tools/mem_printf/mem_printf.so  ./nn filelist_4 -r 5 -lat 30 -lng 90

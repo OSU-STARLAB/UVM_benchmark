@@ -197,6 +197,7 @@ void processDWT(struct dwt *d, int forward, int writeVisual) {
     cudaCheckError("Cuda free");
 
   } else if (d->components == 1) {
+    printf("components == 1\n");
     // Load component
     T *c_r;
     cudaMalloc((void **)&(c_r), componentSize); //< R, aligned component size

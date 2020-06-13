@@ -59,7 +59,7 @@ Layer::~Layer() {
 void Layer::setOutput(float *data) {
   // cudaMemcpy(output, data, sizeof(float) * O, cudaMemcpyHostToDevice);
   memcpy(output, data, sizeof(float) * O); //TODO May change to prefetch
-  cudaMemPrefetchAsync(output,sizeof(float) * O,  0, stream );
+  // cudaMemPrefetchAsync(output,sizeof(float) * O,  0, stream );
 
 }
 

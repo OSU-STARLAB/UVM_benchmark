@@ -83,14 +83,25 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   dim3  grid( 1 , num_blocks);
   dim3  threads(16 , 16);
 
-
-  cudaMallocManaged(&input_cuda, (in + 1) * sizeof(float)); //4
+  // printf("test0\n");
+  cudaMallocManaged(&input_cuda, (in + 1) * sizeof(float)); //2
+  // printf("test1\n");
   cudaMallocManaged(&output_hidden_cuda, (hid + 1) * sizeof(float));//
-  cudaMallocManaged(&input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float)); //68
-  cudaMallocManaged(&hidden_partial_sum, num_blocks * WIDTH * sizeof(float)); //4
-  cudaMallocManaged(&input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float)); //68
+  // printf("test2\n");
+  cudaMallocManaged(&input_hidden_cuda, (in + 1) * (hid + 1) * sizeof(float)); //34
+  // printf("test3\n");
+  cudaMallocManaged(&hidden_partial_sum, num_blocks * WIDTH * sizeof(float)); //2
+  // printf("test4\n");
+  cudaMallocManaged(&input_prev_weights_cuda, (in + 1) * (hid + 1) * sizeof(float)); //34
+  // printf("test6\n");
+  // for (int k = 1; k < in; k++)
+  // {
+  //   input_cuda[k] = net->input_units[k];
+  //   printf("%d\n",k);
+  // }
+
   memcpy(input_cuda,net->input_units, (in + 1)  *sizeof(float));
- 
+  printf("test5\n");
   // this preprocessing stage is added to correct the bugs of wrong memcopy using two-dimensional net->inputweights
   for (int k = 0; k <= in; k++) {	
    for (int j = 0; j <= hid; j++) {
@@ -99,7 +110,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
 	  m++;
     }
   }
-
+  printf("test1\n");
   cudaEvent_t start, stop;
   cudaEventCreate(&start);
   cudaEventCreate(&stop);
@@ -109,7 +120,7 @@ void bpnn_train_cuda(BPNN *net, float *eo, float *eh)
   cudaEventCreate(&start1);
   cudaEventCreate(&stop1);
   float elapsed_time1;
-
+  printf("test2\n");
 #ifdef PREF
 cudaStream_t stream1;
 cudaStream_t stream2;

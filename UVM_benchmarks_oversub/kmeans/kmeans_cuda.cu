@@ -113,16 +113,16 @@ int main(int argc,char* argv[]){
   // group = (int*) malloc(n*sizeof(int));
 
   /* allocate gpu memory */
-  CUDA_CALL(cudaMallocManaged(&group_d,n*sizeof(int)));
-  CUDA_CALL(cudaMallocManaged(&nx_d, k*sizeof(int)));
-  CUDA_CALL(cudaMallocManaged(&ny_d, k*sizeof(int)));
-  CUDA_CALL(cudaMallocManaged(&x_d, n*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&y_d, n*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&mu_x_d, k*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&mu_y_d, k*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&sum_x_d, k*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&sum_y_d, k*sizeof(float)));
-  CUDA_CALL(cudaMallocManaged(&dst_d, n*k*sizeof(float)));
+  cudaMallocManaged(&group_d,n*sizeof(int));
+  cudaMallocManaged(&nx_d, k*sizeof(int));
+  cudaMallocManaged(&ny_d, k*sizeof(int));
+  cudaMallocManaged(&x_d, n*sizeof(float));
+  cudaMallocManaged(&y_d, n*sizeof(float));
+  cudaMallocManaged(&mu_x_d, k*sizeof(float));
+  cudaMallocManaged(&mu_y_d, k*sizeof(float));
+  cudaMallocManaged(&sum_x_d, k*sizeof(float));
+  cudaMallocManaged(&sum_y_d, k*sizeof(float));
+  cudaMallocManaged(&dst_d, n*k*sizeof(float));
 
   memcpy(x_d, x, n*sizeof(float));
   memcpy(y_d, x, n*sizeof(float));

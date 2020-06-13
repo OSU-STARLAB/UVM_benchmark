@@ -1,0 +1,1 @@
+LD_PRELOAD=../../../nvbit_release/tools/mem_printf/mem_printf.so  ./pathfinder 100000 100 20 

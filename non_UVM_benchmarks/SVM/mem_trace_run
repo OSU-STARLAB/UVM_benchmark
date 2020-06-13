@@ -1,0 +1,1 @@
+LD_PRELOAD=../../nvbit_release/tools/mem_printf/mem_printf.so  ./svm_non_uvm 5 1024 93

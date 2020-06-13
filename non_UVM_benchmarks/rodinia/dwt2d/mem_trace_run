@@ -1,0 +1,3 @@
+#./dwt2d 192.bmp -d 192x192 -f -5 -l 3
+#ls
+LD_PRELOAD=../../../nvbit_release/tools/mem_printf/mem_printf.so  ./dwt2d rgb.bmp -d 1024x1024 -f -5 -l 3

@@ -1,0 +1,2 @@
+LD_PRELOAD=../../../nvbit_release/tools/mem_printf/mem_printf.so  ./gaussian -f ../../../data/gaussian/matrix256.txt
+# ./gaussian -s 16
