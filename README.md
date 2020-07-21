@@ -47,5 +47,6 @@ Create the repo of UVM benchmarks
 
 
 If you publish using this software or a modified version of it, we would appreciate your citing the following paper:
+
 Gu, Yongbin, et al. “UVMBench: A Comprehensive Benchmark Suite for Researching Unified Virtual Memory in GPUs.” ArXiv:2007.09822 [Cs], July 2020. arXiv.org, http://arxiv.org/abs/2007.09822.
 
