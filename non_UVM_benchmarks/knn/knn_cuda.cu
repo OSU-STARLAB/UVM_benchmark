@@ -183,7 +183,7 @@ __global__ void cuInsertionSort(float *dist, int *ind, int width, int height,
     p_dist = dist + xIndex;
     p_ind = ind + xIndex;
     max_dist = p_dist[0];
-    p_ind[0] = 1;
+    p_ind[0] = 0;
 
     // Part 1 : sort kth firt elementZ
     for (l = 1; l < k; l++) {
@@ -202,9 +202,9 @@ __global__ void cuInsertionSort(float *dist, int *ind, int width, int height,
           p_ind[j * width] = p_ind[(j - 1) * width];
         }
         p_dist[i * width] = curr_dist;
-        p_ind[i * width] = l + 1;
+        p_ind[i * width] = l;
       } else {
-        p_ind[l * width] = l + 1;
+        p_ind[l * width] = l;
       }
       max_dist = p_dist[curr_row];
     }
@@ -226,7 +226,7 @@ __global__ void cuInsertionSort(float *dist, int *ind, int width, int height,
           p_ind[j * width] = p_ind[(j - 1) * width];
         }
         p_dist[i * width] = curr_dist;
-        p_ind[i * width] = l + 1;
+        p_ind[i * width] = l;
         max_dist = p_dist[max_row];
       }
     }
@@ -309,7 +309,6 @@ void extract_cuda(float *activation, int n_batch, int n_channel, int height,
 
   // Grids ans threads
   dim3 g_size_r((n_batch * n_max_coord * dim_coord) / 256, 1, 1);
-  dim3 t_size_r(256, 1, 1);
   if ((n_batch * n_max_coord * dim_coord) % 256 != 0)
     g_size_r.x += 1;
 
